@@ -12,9 +12,8 @@ public class NotificacionesHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, $"Vuelo_{vueloId}");
     }
 
-    public async Task Identificarse()
+    public async Task Identificarse(string usuario)
     {
-        var usuario = Context.User?.Identity?.Name;
         if (!string.IsNullOrWhiteSpace(usuario))
             await Groups.AddToGroupAsync(Context.ConnectionId, usuario);
     }

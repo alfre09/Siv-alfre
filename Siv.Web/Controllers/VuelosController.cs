@@ -55,8 +55,23 @@ public class VuelosController : Controller
             var modelo = new DetalleVueloViewModel
             {
                 Vuelo = vuelo,
-                Cambios = cambios
+                Cambios = cambios,
+                EstaSiguiendo = false
             };
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var usuario = User.Identity.Name;
+                if (!string.IsNullOrWhiteSpace(usuario))
+                {
+                    var seguimiento = await _seguimientoApiServicio.ObtenerPorVueloYUsuarioAsync(id, usuario);
+                    if (seguimiento != null)
+                    {
+                        modelo.EstaSiguiendo = true;
+                        modelo.SeguimientoId = seguimiento.SeguimientoId;
+                    }
+                }
+            }
 
             return View(modelo);
         }
@@ -90,6 +105,24 @@ public class VuelosController : Controller
                 VueloId = vueloId
             });
             TempData["MensajeExito"] = "Ahora estás siguiendo este vuelo. Te notificaremos ante cualquier cambio.";
+        }
+        catch (ExcepcionApi excepcion)
+        {
+            TempData["MensajeError"] = excepcion.Message;
+        }
+
+        return RedirectToAction(nameof(Detalle), new { id = vueloId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "UsuarioRegistrado")]
+    public async Task<IActionResult> DejarDeSeguir(int vueloId, int seguimientoId)
+    {
+        try
+        {
+            await _seguimientoApiServicio.EliminarAsync(seguimientoId);
+            TempData["MensajeExito"] = "Has dejado de seguir este vuelo. Ya no recibirás notificaciones sobre sus cambios.";
         }
         catch (ExcepcionApi excepcion)
         {

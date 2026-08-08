@@ -103,3 +103,15 @@ else
         </div>
     </div>
 }
+
+@section Scripts {
+    <script>
+        // Escuchar notificaciones globales para refrescar la tabla
+        window.onSivNotification = function (mensaje) {
+            // Si hay un cambio, recargamos la página después de mostrar el toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500); // Dar 1.5s para que se vea el toast antes de recargar
+        };
+    </script>
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Siv.Application.Dtos;
 using Siv.Application.Interfaces;
 
@@ -33,6 +33,20 @@ public class SeguimientosController : ControllerBase
     {
         await _seguimientoServicio.EliminarAsync(id);
         return NoContent();
+    }
+
+    [HttpGet("{vueloId:int}/verificar")]
+    public async Task<ActionResult<SeguimientoDto>> VerificarSeguimiento(int vueloId, [FromQuery] string usuario)
+    {
+        if (string.IsNullOrWhiteSpace(usuario))
+            return BadRequest(new { mensaje = "El usuario es obligatorio." });
+
+        var seguimiento = await _seguimientoServicio.ObtenerPorVueloYUsuarioAsync(vueloId, usuario);
+        
+        if (seguimiento == null)
+            return NotFound();
+
+        return Ok(seguimiento);
     }
 }
 

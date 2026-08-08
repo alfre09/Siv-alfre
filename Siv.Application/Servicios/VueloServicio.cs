@@ -67,6 +67,12 @@ public class VueloServicio : IVueloServicio
         if (vuelo is null || !PoliticaVisibilidadVuelo.PuedeConsultar(vuelo.NivelVisibilidad, rolUsuario))
             return null;
 
+        var rolAuditoria = string.IsNullOrWhiteSpace(rolUsuario) ? "Usuario anónimo" : $"Rol: {rolUsuario}";
+        await _auditoriaServicio.RegistrarAsync(
+            "Consultar", 
+            "Vuelos", 
+            $"Se consultó el detalle del vuelo {vuelo.NumeroVuelo} (id {id}). {rolAuditoria}");
+
         return vuelo?.ADto();
     }
 

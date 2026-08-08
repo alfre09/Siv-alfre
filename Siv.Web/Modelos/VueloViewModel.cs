@@ -25,4 +25,6 @@ public class DetalleVueloViewModel
 {
     public VueloViewModel Vuelo { get; set; } = new();
     public List<CambioOperativoViewModel> Cambios { get; set; } = new();
+    public bool EstaSiguiendo { get; set; }
+    public int? SeguimientoId { get; set; }
 }

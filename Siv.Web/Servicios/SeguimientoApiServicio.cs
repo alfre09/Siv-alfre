@@ -26,4 +26,14 @@ public class SeguimientoApiServicio : ApiServicioBase, ISeguimientoApiServicio
         var respuesta = await ClienteHttp.DeleteAsync($"api/seguimientos/{id}");
         await AsegurarExitoAsync(respuesta);
     }
+
+    public async Task<SeguimientoViewModel?> ObtenerPorVueloYUsuarioAsync(int vueloId, string usuario)
+    {
+        var respuesta = await ClienteHttp.GetAsync($"api/seguimientos/{vueloId}/verificar?usuario={Uri.EscapeDataString(usuario)}");
+        
+        if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return null;
+
+        return await LeerRespuestaExitosaAsync<SeguimientoViewModel>(respuesta);
+    }
 }

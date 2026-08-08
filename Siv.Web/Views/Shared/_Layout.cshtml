@@ -114,8 +114,10 @@
                 try {
                     await connection.start();
                     console.log("SignalR Connected.");
-                    // El hub obtiene el usuario directamente del token autenticado (si lo hay)
-                    await connection.invoke("Identificarse");
+                    var usuario = '@(User.Identity?.Name ?? "")';
+                    if (usuario) {
+                        await connection.invoke("Identificarse", usuario);
+                    }
                 } catch (err) {
                     console.error("SignalR Connection Error: ", err);
                     setTimeout(start, 5000);

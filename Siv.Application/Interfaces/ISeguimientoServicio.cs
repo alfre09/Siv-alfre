@@ -9,4 +9,6 @@ public interface ISeguimientoServicio
     Task<SeguimientoDto> CrearAsync(CrearSeguimientoDto dto);
     Task ActualizarAsync(ActualizarSeguimientoDto dto);
     Task EliminarAsync(int id);
+    Task<SeguimientoDto?> ObtenerPorVueloYUsuarioAsync(int vueloId, string usuario);
+    Task<List<SeguimientoDto>> ObtenerPorUsuarioAsync(string usuario);
 }

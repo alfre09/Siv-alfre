@@ -35,6 +35,20 @@ public class SeguimientoServicio : ISeguimientoServicio
         return seguimiento?.ADto();
     }
 
+    public async Task<SeguimientoDto?> ObtenerPorVueloYUsuarioAsync(int vueloId, string usuario)
+    {
+        _logger.LogInformation("Obteniendo seguimiento para vuelo {VueloId} y usuario {Usuario}", vueloId, usuario);
+        var seguimiento = await _unidadDeTrabajo.Seguimientos.ObtenerPorVueloYUsuarioAsync(vueloId, usuario);
+        return seguimiento?.ADto();
+    }
+
+    public async Task<List<SeguimientoDto>> ObtenerPorUsuarioAsync(string usuario)
+    {
+        _logger.LogInformation("Obteniendo todos los seguimientos para el usuario {Usuario}", usuario);
+        var seguimientos = await _unidadDeTrabajo.Seguimientos.ObtenerTodosAsync();
+        return seguimientos.Where(s => s.Usuario.Equals(usuario, StringComparison.OrdinalIgnoreCase)).Select(s => s.ADto()).ToList();
+    }
+
     public async Task<SeguimientoDto> CrearAsync(CrearSeguimientoDto dto)
     {
         _logger.LogInformation("Iniciando creación de seguimiento para el vuelo {VueloId}", dto.VueloId);

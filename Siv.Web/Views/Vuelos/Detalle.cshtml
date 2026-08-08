@@ -94,15 +94,31 @@
                 </p>
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
                 {
-                <form asp-action="Seguir" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="vueloId" value="@vuelo.VueloId" />
-                    <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">Usuario autenticado: <strong>@User.Identity?.Name</strong></p>
-                    <button type="submit" class="siv-boton siv-boton--acento siv-boton--bloque">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        Seguir vuelo
-                    </button>
-                </form>
+                    @if (Model.EstaSiguiendo)
+                    {
+                        <form asp-action="DejarDeSeguir" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="vueloId" value="@vuelo.VueloId" />
+                            <input type="hidden" name="seguimientoId" value="@Model.SeguimientoId" />
+                            <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">Usuario autenticado: <strong>@User.Identity?.Name</strong></p>
+                            <button type="submit" class="siv-boton siv-boton--peligro siv-boton--bloque">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                                Dejar de seguir vuelo
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Seguir" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="vueloId" value="@vuelo.VueloId" />
+                            <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">Usuario autenticado: <strong>@User.Identity?.Name</strong></p>
+                            <button type="submit" class="siv-boton siv-boton--acento siv-boton--bloque">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                Seguir vuelo
+                            </button>
+                        </form>
+                    }
                 }
                 else
                 {
