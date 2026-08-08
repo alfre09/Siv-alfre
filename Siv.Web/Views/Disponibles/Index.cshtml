@@ -95,7 +95,7 @@ else
                             <td>@vuelo.AeropuertoDestinoNombre</td>
                             <td>@vuelo.HorarioProgramado.ToString("dd MMM yyyy")</td>
                             <td>@vuelo.HorarioProgramado.ToString("HH:mm")</td>
-                            <td>@(vuelo.PuertaEmbarque ?? "-")</td>
+                            <td>@(vuelo.Puerta ?? "-")</td>
                             <td><partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" /></td>
                             <td><a asp-controller="Vuelos" asp-action="Detalle" asp-route-id="@vuelo.VueloId" class="siv-boton siv-boton--secundario siv-boton--chico">Ver detalle</a></td>
                         </tr>
