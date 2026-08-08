@@ -66,6 +66,11 @@ public class AuthController : Controller
                     : excepcion.Message);
             return View(modelo);
         }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "Ocurrió un error al conectar con el servidor. Por favor, verifique su conexión e intente más tarde.");
+            return View(modelo);
+        }
     }
 
     [HttpPost]
@@ -85,6 +90,11 @@ public class AuthController : Controller
         catch (ExcepcionApi excepcion)
         {
             ModelState.AddModelError(string.Empty, excepcion.Message);
+            return View(modelo);
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "Ocurrió un error al conectar con el servidor. Por favor, verifique su conexión e intente más tarde.");
             return View(modelo);
         }
     }
