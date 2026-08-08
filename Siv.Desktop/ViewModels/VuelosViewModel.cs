@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Siv.Desktop.Interfaces;
 using Siv.Desktop.Modelos;
+using System.Text.RegularExpressions;
 using Siv.Desktop.Servicios;
 
 namespace Siv.Desktop.ViewModels;
@@ -29,6 +30,7 @@ public partial class VuelosViewModel : ViewModelBase
     [ObservableProperty] private string _nivelVisibilidadNuevo = "Publico";
 
     public List<string> NivelesVisibilidad { get; } = new() { "Publico", "Interno", "Restringido" };
+    public bool EsAdmin => string.Equals(TokenManager.Rol, "Admin", StringComparison.OrdinalIgnoreCase);
 
     public VuelosViewModel(
         IVueloApiServicio vueloApiServicio,
@@ -71,9 +73,15 @@ public partial class VuelosViewModel : ViewModelBase
     [RelayCommand]
     private async Task CrearVueloAsync()
     {
-        if (string.IsNullOrWhiteSpace(NumeroVueloNuevo))
+        if (string.IsNullOrWhiteSpace(NumeroVueloNuevo) || NumeroVueloNuevo.Length < 3 || NumeroVueloNuevo.Length > 10)
         {
-            MostrarValidacion("Indica el número de vuelo.");
+            MostrarValidacion("El número de vuelo debe tener entre 3 y 10 caracteres.");
+            return;
+        }
+
+        if (!Regex.IsMatch(NumeroVueloNuevo, "^[a-zA-Z0-9]+$"))
+        {
+            MostrarValidacion("El número de vuelo solo puede contener letras y números, sin espacios.");
             return;
         }
 
@@ -92,6 +100,18 @@ public partial class VuelosViewModel : ViewModelBase
         if (!DateTime.TryParse(HorarioProgramadoNuevo, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out var horario))
         {
             MostrarValidacion("El horario no es válido. Usa el formato dd/MM/yyyy HH:mm.");
+            return;
+        }
+
+        if (horario <= DateTime.Now)
+        {
+            MostrarValidacion("El horario programado debe ser en el futuro.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(PuertaNueva) && PuertaNueva.Length > 5)
+        {
+            MostrarValidacion("El nombre de la puerta no puede exceder los 5 caracteres.");
             return;
         }
 

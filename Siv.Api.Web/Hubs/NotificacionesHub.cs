@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Siv.Api.Web.Hubs;
 
-[Authorize]
+// [Authorize]
 public class NotificacionesHub : Hub
 {
     // Opcional: Agregar métodos para gestionar grupos si quisiéramos enviar notificaciones por vuelo específico

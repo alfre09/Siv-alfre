@@ -37,7 +37,7 @@ public class VuelosController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Operador")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<VueloDto>> Crear([FromBody] CrearVueloDto dto)
     {
         var vueloCreado = await _vueloServicio.CrearAsync(dto);

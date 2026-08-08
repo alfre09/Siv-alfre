@@ -91,80 +91,83 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
-    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
-    {
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const connection = new signalR.HubConnectionBuilder()
-                    .withUrl("http://localhost:5200/notificacionesHub")
-                    .configureLogging(signalR.LogLevel.Information)
-                    .build();
+    @* Siempre incluir SignalR para recibir actualizaciones públicas (ej. vuelos) *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5200/notificacionesHub")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
 
-                connection.on("RecibirNotificacion", function (mensaje) {
-                    mostrarToast(mensaje);
-                });
+            window.sivHubConnection = connection;
 
-                async function start() {
-                    try {
-                        await connection.start();
-                        console.log("SignalR Connected.");
-                        // El hub obtiene el usuario directamente del token autenticado.
-                        await connection.invoke("Identificarse");
-                    } catch (err) {
-                        console.error("SignalR Connection Error: ", err);
-                        setTimeout(start, 5000);
-                    }
-                }
-
-                connection.onclose(async () => {
-                    await start();
-                });
-
-                start();
-
-                function mostrarToast(mensaje) {
-                    const container = document.getElementById("toast-container");
-                    const toast = document.createElement("div");
-                    toast.className = "siv-tarjeta siv-alerta siv-alerta--info";
-                    toast.style.width = "300px";
-                    toast.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
-                    toast.style.animation = "slideIn 0.3s ease-out forwards";
-                    
-                    toast.innerHTML = `
-                        <div style="display:flex; align-items:flex-start; gap:0.75rem;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="margin-top: 2px;">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                            <div>
-                                <strong style="display:block; margin-bottom: 0.2rem;">Nueva Notificación</strong>
-                                <p style="margin: 0; font-size: 0.9rem;">${mensaje}</p>
-                            </div>
-                            <button type="button" style="background:transparent; border:none; color:inherit; cursor:pointer; margin-left:auto; opacity: 0.6;" onclick="this.parentElement.parentElement.remove()">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-                    `;
-                    
-                    container.appendChild(toast);
-                    
-                    // Auto remove after 6 seconds
-                    setTimeout(() => {
-                        if (toast.parentElement) {
-                            toast.style.opacity = "0";
-                            toast.style.transition = "opacity 0.3s";
-                            setTimeout(() => toast.remove(), 300);
-                        }
-                    }, 6000);
+            connection.on("RecibirNotificacion", function (mensaje) {
+                mostrarToast(mensaje);
+                // Si la página tiene una función global para manejar notificaciones, llamarla
+                if (typeof window.onSivNotification === 'function') {
+                    window.onSivNotification(mensaje);
                 }
             });
-        </script>
-        <style>
-            @@keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+
+            async function start() {
+                try {
+                    await connection.start();
+                    console.log("SignalR Connected.");
+                    // El hub obtiene el usuario directamente del token autenticado (si lo hay)
+                    await connection.invoke("Identificarse");
+                } catch (err) {
+                    console.error("SignalR Connection Error: ", err);
+                    setTimeout(start, 5000);
+                }
             }
-        </style>
-    }
+
+            connection.onclose(async () => {
+                await start();
+            });
+
+            start();
+
+            function mostrarToast(mensaje) {
+                const container = document.getElementById("toast-container");
+                const toast = document.createElement("div");
+                toast.className = "siv-tarjeta siv-alerta siv-alerta--info";
+                toast.style.width = "300px";
+                toast.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+                toast.style.animation = "slideIn 0.3s ease-out forwards";
+                
+                toast.innerHTML = `
+                    <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="margin-top: 2px;">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <div>
+                            <strong style="display:block; margin-bottom: 0.2rem;">Nueva Notificación</strong>
+                            <p style="margin: 0; font-size: 0.9rem;">${mensaje}</p>
+                        </div>
+                        <button type="button" style="background:transparent; border:none; color:inherit; cursor:pointer; margin-left:auto; opacity: 0.6;" onclick="this.parentElement.parentElement.remove()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.opacity = "0";
+                        toast.style.transition = "opacity 0.3s";
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, 6000);
+            }
+        });
+    </script>
+    <style>
+        @@keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </body>
 </html>

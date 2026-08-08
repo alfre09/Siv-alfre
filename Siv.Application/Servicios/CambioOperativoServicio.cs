@@ -86,6 +86,14 @@ public class CambioOperativoServicio : ICambioOperativoServicio
     {
         _logger.LogInformation("Iniciando registro de cambio de puerta para vuelo {VueloId}", dto.VueloId);
         var vuelo = await ObtenerVueloConEstadoAsync(dto.VueloId);
+        
+        var puertaExiste = await _unidadDeTrabajo.Puertas.ObtenerTodosAsync();
+        if (!puertaExiste.Any(p => p.Nombre.Equals(dto.NuevaPuerta, StringComparison.OrdinalIgnoreCase)))
+        {
+            _logger.LogWarning("Fallo de validación: La puerta {NuevaPuerta} no existe en el sistema.", dto.NuevaPuerta);
+            throw new ExcepcionDeValidacion($"La puerta '{dto.NuevaPuerta}' no existe en el aeropuerto. Por favor selecciona una válida.");
+        }
+        
         var (valorAnterior, valorNuevo) = vuelo.AplicarCambioDePuerta(dto.NuevaPuerta);
 
         if (string.Equals(valorAnterior, valorNuevo, StringComparison.OrdinalIgnoreCase))

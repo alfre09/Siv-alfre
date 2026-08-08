@@ -18,10 +18,10 @@ public class AuditoriaServicio : IAuditoriaServicio
         _logger = logger;
     }
 
-    public async Task RegistrarAsync(string accion, string tabla, string descripcion)
+    public async Task RegistrarAsync(string accion, string tabla, string descripcion, string usuario = "Sistema", int? registroId = null, string? valorAnterior = null, string? valorNuevo = null)
     {
         _logger.LogInformation("Registrando auditoría para la tabla {Tabla} (Acción: {Accion})", tabla, accion);
-        var auditoria = new Auditoria(accion, tabla, descripcion);
+        var auditoria = new Auditoria(accion, tabla, descripcion, usuario, registroId, valorAnterior, valorNuevo);
         await _unidadDeTrabajo.Auditorias.AgregarAsync(auditoria);
         await _unidadDeTrabajo.GuardarCambiosAsync();
     }

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Siv.Desktop.Interfaces;
 using Siv.Desktop.Modelos;
 using System.Windows;
+using Siv.Desktop.Servicios;
 
 namespace Siv.Desktop.ViewModels;
 
@@ -20,7 +21,7 @@ public partial class NotificacionesViewModel : ViewModelBase
     public NotificacionesViewModel(INotificacionApiServicio notificacionApiServicio)
     {
         _notificacionApiServicio = notificacionApiServicio;
-        Task.Run(CargarDatosAsync);
+        _ = CargarDatosAsync();
     }
 
     [RelayCommand]
@@ -29,10 +30,14 @@ public partial class NotificacionesViewModel : ViewModelBase
         try
         {
             var notificaciones = await _notificacionApiServicio.ObtenerTodosAsync();
-            Application.Current.Dispatcher.Invoke(() =>
+            await Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 Notificaciones = new ObservableCollection<NotificacionModelo>(notificaciones);
             });
+        }
+        catch (ExcepcionApi ex)
+        {
+            MessageBox.Show(ex.Message, "No se pudieron cargar las notificaciones", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         catch (Exception ex)
         {
@@ -52,6 +57,10 @@ public partial class NotificacionesViewModel : ViewModelBase
             // Forzar actualización de la UI
             var index = Notificaciones.IndexOf(notificacion);
             Notificaciones[index] = notificacion;
+        }
+        catch (ExcepcionApi ex)
+        {
+            MessageBox.Show(ex.Message, "Error al marcar notificación", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         catch (Exception ex)
         {

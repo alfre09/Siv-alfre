@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     private IAuditoriaRepositorio? _auditorias;
     private IReservaRepositorio? _reservas;
     private IUsuarioRepositorio? _usuarios;
-
+    private IPuertaRepositorio? _puertas;
     public UnitOfWork(SivDbContext contexto, ILoggerFactory loggerFactory)
     {
         _contexto = contexto;
@@ -41,7 +41,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     public IAuditoriaRepositorio Auditorias => _auditorias ??= new AuditoriaRepositorio(_contexto, _loggerFactory.CreateLogger<AuditoriaRepositorio>());
     public IReservaRepositorio Reservas => _reservas ??= new ReservaRepositorio(_contexto, _loggerFactory.CreateLogger<ReservaRepositorio>());
     public IUsuarioRepositorio Usuarios => _usuarios ??= new UsuarioRepositorio(_contexto, _loggerFactory.CreateLogger<UsuarioRepositorio>());
-
+    public IPuertaRepositorio Puertas => _puertas ??= new PuertaRepositorio(_contexto);
     public async Task<int> GuardarCambiosAsync()
     {
         _logger.LogInformation("Iniciando GuardarCambiosAsync");

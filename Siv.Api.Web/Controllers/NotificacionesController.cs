@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Siv.Application.Dtos;
 using Siv.Application.Interfaces;
 
@@ -40,6 +40,23 @@ public class NotificacionesController : ControllerBase
         await _notificacionServicio.MarcarComoLeidaAsync(id, usuario);
         return NoContent();
     }
+
+    [HttpPost("difundir")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous] // Para permitir que Desktop envíe la notificación
+    public async Task<IActionResult> Difundir([FromBody] DifundirRequest request)
+    {
+        // En un caso real usaríamos una clave compartida o un token para verificar que viene de la API Desktop
+        // Aquí simplemente usamos el notificador para enviar la señal a los clientes de SignalR en la Web
+        var notificador = HttpContext.RequestServices.GetRequiredService<INotificadorTiempoReal>();
+        await notificador.EnviarNotificacionAsync(request.Usuario, request.Mensaje);
+        return Ok();
+    }
+}
+
+public class DifundirRequest
+{
+    public string Usuario { get; set; } = string.Empty;
+    public string Mensaje { get; set; } = string.Empty;
 }
 
 

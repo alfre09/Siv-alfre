@@ -101,7 +101,11 @@ public class CambioOperativoServicioTests
         _auditoriaMock.Verify(a => a.RegistrarAsync(
             "Registrar", 
             "CambiosOperativos", 
-            It.IsAny<string>()), Times.Once);
+            It.IsAny<string>(), 
+            It.IsAny<string>(), 
+            It.IsAny<int?>(), 
+            It.IsAny<string?>(), 
+            It.IsAny<string?>()), Times.Once);
     }
 
     [Fact]

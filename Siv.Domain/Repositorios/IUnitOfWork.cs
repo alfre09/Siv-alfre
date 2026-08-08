@@ -13,6 +13,7 @@ public interface IUnitOfWork
     IAuditoriaRepositorio Auditorias { get; }
     IReservaRepositorio Reservas { get; }
     IUsuarioRepositorio Usuarios { get; }
+    IPuertaRepositorio Puertas { get; }
 
     Task<int> GuardarCambiosAsync();
     Task EjecutarEnTransaccionAsync(Func<Task> operacion);

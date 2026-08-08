@@ -41,8 +41,10 @@ constructor.Services.AddSwaggerGen(opciones =>
 });
 
 constructor.Services.AddSIVDependencies(constructor.Configuration);
-constructor.Services.AddScoped<Siv.Application.Interfaces.INotificadorTiempoReal, Siv.Api.Desktop.Servicios.NotificadorNulo>();
-
+constructor.Services.AddHttpClient<Siv.Application.Interfaces.INotificadorTiempoReal, Siv.Api.Desktop.Servicios.NotificadorApiWeb>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5200");
+});
 var aplicacion = constructor.Build();
 
 if (aplicacion.Environment.IsDevelopment())

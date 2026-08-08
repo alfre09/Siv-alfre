@@ -19,7 +19,7 @@ public partial class MainViewModel : ViewModelBase
     public bool PuedeConsultarVuelos => EsAdmin || EsOperador || EsAuditor;
     public bool PuedeGestionarCambios => EsAdmin || EsOperador;
     public bool PuedeConsultarHistorial => EsAdmin || EsOperador || EsAuditor;
-    public bool PuedeConsultarAuditoria => EsAdmin || EsAuditor;
+    public bool PuedeConsultarAuditoria => EsAdmin;
     public bool PuedeConsultarNotificaciones => EsAdmin || EsAuditor;
 
     public MainViewModel(IServiceProvider serviceProvider)

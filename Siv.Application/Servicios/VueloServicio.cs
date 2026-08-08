@@ -73,6 +73,17 @@ public class VueloServicio : IVueloServicio
     public async Task<VueloDto> CrearAsync(CrearVueloDto dto)
     {
         _logger.LogInformation("Iniciando creación de vuelo con número {Numero}", dto.NumeroVuelo);
+
+        if (dto.HorarioProgramado <= DateTime.Now)
+        {
+            throw new ExcepcionDeValidacion("El horario programado del vuelo debe ser en el futuro.");
+        }
+
+        if (dto.AeropuertoOrigenId == dto.AeropuertoDestinoId)
+        {
+            throw new ExcepcionDeValidacion("El aeropuerto de origen y el de destino deben ser diferentes.");
+        }
+
         await ValidarReferenciasAsync(dto.AerolineaId, dto.AeropuertoOrigenId, dto.AeropuertoDestinoId);
 
         var numeroVuelo = dto.NumeroVuelo?.Trim() ?? string.Empty;
@@ -125,6 +136,16 @@ public class VueloServicio : IVueloServicio
 
         if (string.Equals(rolUsuario, "Operador", StringComparison.OrdinalIgnoreCase))
             dto.NivelVisibilidad = vuelo.NivelVisibilidad;
+
+        if (dto.HorarioProgramado <= DateTime.Now)
+        {
+            throw new ExcepcionDeValidacion("El horario programado del vuelo debe ser en el futuro.");
+        }
+
+        if (dto.AeropuertoOrigenId == dto.AeropuertoDestinoId)
+        {
+            throw new ExcepcionDeValidacion("El aeropuerto de origen y el de destino deben ser diferentes.");
+        }
 
         await ValidarReferenciasAsync(dto.AerolineaId, dto.AeropuertoOrigenId, dto.AeropuertoDestinoId);
 

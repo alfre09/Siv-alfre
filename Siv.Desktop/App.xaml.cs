@@ -54,6 +54,7 @@ public partial class App : Application
         services.AddHttpClient<IAeropuertoApiServicio, AeropuertoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         services.AddHttpClient<IEstadoVueloApiServicio, EstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         services.AddHttpClient<ICambioOperativoApiServicio, CambioOperativoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IPuertaApiServicio, PuertaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         services.AddHttpClient<ISeguimientoApiServicio, SeguimientoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         services.AddHttpClient<INotificacionApiServicio, NotificacionApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         services.AddHttpClient<IHistorialEstadoVueloApiServicio, HistorialEstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
@@ -86,5 +87,14 @@ public partial class App : Application
 
         var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
         loginWindow.Show();
+    }
+    protected override void OnExit(ExitEventArgs e)
+    {
+        if (ServiceProvider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+        
+        base.OnExit(e);
     }
 }

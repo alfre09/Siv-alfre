@@ -33,7 +33,8 @@ else
                         <th>Vuelo</th>
                         <th>Aerolínea</th>
                         <th>Ruta</th>
-                        <th>Horario</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
                         <th>Puerta</th>
                         <th>Estado</th>
                         <th></th>
@@ -46,7 +47,8 @@ else
                             <td><span class="siv-codigo">@vuelo.NumeroVuelo</span></td>
                             <td>@vuelo.AerolineaNombre</td>
                             <td>@vuelo.AeropuertoOrigenNombre → @vuelo.AeropuertoDestinoNombre</td>
-                            <td>@vuelo.HorarioProgramado.ToString("dd MMM yyyy · HH:mm")</td>
+                            <td>@vuelo.HorarioProgramado.ToString("dd MMM yyyy")</td>
+                            <td>@vuelo.HorarioProgramado.ToString("HH:mm")</td>
                             <td>@(string.IsNullOrWhiteSpace(vuelo.Puerta) ? "—" : vuelo.Puerta)</td>
                             <td>
                                 <partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" view-data='new ViewDataDictionary(ViewData) { ["prefijoClase"] = "siv-insignia-clara" }' />
@@ -60,4 +62,16 @@ else
             </table>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        // Escuchar notificaciones globales para refrescar la tabla
+        window.onSivNotification = function (mensaje) {
+            // Si hay un cambio, recargamos la página después de mostrar el toast
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500); // Dar 1.5s para que se vea el toast antes de recargar
+        };
+    </script>
 }

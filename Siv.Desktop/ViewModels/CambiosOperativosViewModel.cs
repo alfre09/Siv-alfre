@@ -12,6 +12,8 @@ public partial class CambiosOperativosViewModel : ViewModelBase
 {
     private readonly ICambioOperativoApiServicio _cambioOperativoApiServicio;
     private readonly IEstadoVueloApiServicio _estadoVueloApiServicio;
+    private readonly IVueloApiServicio _vueloApiServicio;
+    private readonly IPuertaApiServicio _puertaApiServicio;
 
     [ObservableProperty]
     private ObservableCollection<CambioOperativoModelo> _cambios = new();
@@ -23,7 +25,43 @@ public partial class CambiosOperativosViewModel : ViewModelBase
     private CambioOperativoModelo? _cambioSeleccionado;
 
     [ObservableProperty]
-    private string _vueloIdTexto = string.Empty;
+    private ObservableCollection<VueloModelo> _vuelos = new();
+
+    [ObservableProperty]
+    private ObservableCollection<PuertaModelo> _puertas = new();
+
+    [ObservableProperty]
+    private VueloModelo? _vueloSeleccionado;
+
+    partial void OnVueloSeleccionadoChanged(VueloModelo? value)
+    {
+        if (value != null)
+        {
+            NuevoHorarioTexto = value.HorarioProgramado.ToString("dd/MM/yyyy HH:mm");
+            
+            if (!string.IsNullOrWhiteSpace(value.Puerta))
+            {
+                PuertaSeleccionada = Puertas.FirstOrDefault(p => p.Codigo == value.Puerta);
+            }
+            else
+            {
+                PuertaSeleccionada = null;
+            }
+
+            if (value.EstadoVueloId > 0)
+            {
+                EstadoSeleccionado = Estados.FirstOrDefault(e => e.EstadoVueloId == value.EstadoVueloId);
+            }
+            else
+            {
+                EstadoSeleccionado = null;
+            }
+        }
+        else
+        {
+            LimpiarFormulario(false);
+        }
+    }
 
     [ObservableProperty]
     private string _tipoCambioSeleccionado = "Retraso";
@@ -32,7 +70,7 @@ public partial class CambiosOperativosViewModel : ViewModelBase
     private string _nuevoHorarioTexto = string.Empty;
 
     [ObservableProperty]
-    private string _nuevaPuerta = string.Empty;
+    private PuertaModelo? _puertaSeleccionada;
 
     [ObservableProperty]
     private EstadoVueloModelo? _estadoSeleccionado;
@@ -45,10 +83,14 @@ public partial class CambiosOperativosViewModel : ViewModelBase
 
     public CambiosOperativosViewModel(
         ICambioOperativoApiServicio cambioOperativoApiServicio,
-        IEstadoVueloApiServicio estadoVueloApiServicio)
+        IEstadoVueloApiServicio estadoVueloApiServicio,
+        IVueloApiServicio vueloApiServicio,
+        IPuertaApiServicio puertaApiServicio)
     {
         _cambioOperativoApiServicio = cambioOperativoApiServicio;
         _estadoVueloApiServicio = estadoVueloApiServicio;
+        _vueloApiServicio = vueloApiServicio;
+        _puertaApiServicio = puertaApiServicio;
         _ = CargarDatosAsync();
     }
 
@@ -59,11 +101,15 @@ public partial class CambiosOperativosViewModel : ViewModelBase
         {
             var cambios = await _cambioOperativoApiServicio.ObtenerTodosAsync();
             var estados = await _estadoVueloApiServicio.ObtenerTodosAsync();
+            var vuelos = await _vueloApiServicio.ObtenerTodosAsync();
+            var puertas = await _puertaApiServicio.ObtenerTodasAsync();
 
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Cambios = new ObservableCollection<CambioOperativoModelo>(cambios);
                 Estados = new ObservableCollection<EstadoVueloModelo>(estados);
+                Vuelos = new ObservableCollection<VueloModelo>(vuelos);
+                Puertas = new ObservableCollection<PuertaModelo>(puertas);
             });
         }
         catch (Exception ex)
@@ -76,12 +122,14 @@ public partial class CambiosOperativosViewModel : ViewModelBase
     [RelayCommand]
     private async Task RegistrarCambioAsync()
     {
-        if (!int.TryParse(VueloIdTexto, out var vueloId) || vueloId <= 0)
+        if (VueloSeleccionado == null)
         {
-            MessageBox.Show("Indica un ID de vuelo válido.", "Validación",
+            MessageBox.Show("Selecciona un vuelo válido.", "Validación",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
+        
+        var vueloId = VueloSeleccionado.VueloId;
 
         if (string.IsNullOrWhiteSpace(Causa))
         {
@@ -115,9 +163,9 @@ public partial class CambiosOperativosViewModel : ViewModelBase
                     break;
 
                 case "CambioPuerta":
-                    if (string.IsNullOrWhiteSpace(NuevaPuerta))
+                    if (PuertaSeleccionada == null)
                     {
-                        MessageBox.Show("Indica la nueva puerta.", "Validación",
+                        MessageBox.Show("Selecciona la nueva puerta.", "Validación",
                             MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
@@ -126,7 +174,7 @@ public partial class CambiosOperativosViewModel : ViewModelBase
                         new RegistrarCambioPuertaModelo
                         {
                             VueloId = vueloId,
-                            NuevaPuerta = NuevaPuerta.Trim(),
+                            NuevaPuerta = PuertaSeleccionada.Codigo,
                             Causa = Causa.Trim()
                         });
                     break;
@@ -172,11 +220,13 @@ public partial class CambiosOperativosViewModel : ViewModelBase
         }
     }
 
-    private void LimpiarFormulario()
+    private void LimpiarFormulario(bool limpiarVuelo = true)
     {
-        VueloIdTexto = string.Empty;
+        if (limpiarVuelo)
+            VueloSeleccionado = null;
+            
         NuevoHorarioTexto = string.Empty;
-        NuevaPuerta = string.Empty;
+        PuertaSeleccionada = null;
         Causa = string.Empty;
         EstadoSeleccionado = null;
     }

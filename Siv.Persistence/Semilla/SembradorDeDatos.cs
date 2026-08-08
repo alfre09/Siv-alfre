@@ -11,6 +11,7 @@ public static class SembradorDeDatos
         await SembrarAerolineasAsync(contexto);
         await SembrarAeropuertosAsync(contexto);
         await SembrarUsuariosAsync(contexto);
+        await SembrarPuertasAsync(contexto);
     }
 
     private static async Task SembrarEstadosAsync(SivDbContext contexto)
@@ -68,6 +69,38 @@ public static class SembradorDeDatos
             new Usuario("admin", "Admin"),
             new Usuario("operador1", "Operador")
         );
+
+        await contexto.SaveChangesAsync();
+    }
+
+    private static async Task SembrarPuertasAsync(SivDbContext contexto)
+    {
+        if (await contexto.Puertas.AnyAsync())
+            return;
+
+        var a1 = await contexto.Aeropuertos.FirstOrDefaultAsync(a => a.Codigo == "SDQ");
+        var a2 = await contexto.Aeropuertos.FirstOrDefaultAsync(a => a.Codigo == "PUJ");
+
+        if (a1 != null)
+        {
+            contexto.Puertas.AddRange(
+                new Puerta("1", a1.Id),
+                new Puerta("2", a1.Id),
+                new Puerta("3", a1.Id),
+                new Puerta("4", a1.Id),
+                new Puerta("5", a1.Id)
+            );
+        }
+
+        if (a2 != null)
+        {
+            contexto.Puertas.AddRange(
+                new Puerta("A1", a2.Id),
+                new Puerta("A2", a2.Id),
+                new Puerta("B1", a2.Id),
+                new Puerta("B2", a2.Id)
+            );
+        }
 
         await contexto.SaveChangesAsync();
     }

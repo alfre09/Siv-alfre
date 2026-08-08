@@ -20,6 +20,7 @@ public class SivDbContext : DbContext
     public DbSet<Auditoria> Auditorias => Set<Auditoria>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Reserva> Reservas => Set<Reserva>();
+    public DbSet<Puerta> Puertas => Set<Puerta>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

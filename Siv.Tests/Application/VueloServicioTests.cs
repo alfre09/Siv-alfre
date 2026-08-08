@@ -89,6 +89,10 @@ public class VueloServicioTests
         _auditoriaMock.Verify(a => a.RegistrarAsync(
             "Crear", 
             "Vuelos", 
-            It.IsAny<string>()), Times.Once);
+            It.IsAny<string>(), 
+            It.IsAny<string>(), 
+            It.IsAny<int?>(), 
+            It.IsAny<string?>(), 
+            It.IsAny<string?>()), Times.Once);
     }
 }

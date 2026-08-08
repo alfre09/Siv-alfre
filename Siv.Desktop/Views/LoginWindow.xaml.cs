@@ -41,17 +41,26 @@ public partial class LoginWindow : Window
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 if (result != null && !string.IsNullOrEmpty(result.Token))
                 {
-                    // Guardar el token en el TokenManager global
-                    TokenManager.Token = result.Token;
-                    TokenManager.Rol = result.Rol;
-                    
-                    // Abrir MainWindow
-                    var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-                    mainWindow.Show();
-                    
-                    // Cerrar LoginWindow
-                    this.Close();
-                    return;
+                    if (result.Rol == "Admin" || result.Rol == "Operador" || result.Rol == "Auditor")
+                    {
+                        // Guardar el token en el TokenManager global
+                        TokenManager.Token = result.Token;
+                        TokenManager.Rol = result.Rol;
+                        
+                        // Abrir MainWindow
+                        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                        mainWindow.Show();
+                        
+                        // Cerrar LoginWindow
+                        this.Close();
+                        return;
+                    }
+                    else
+                    {
+                        TxtMensajeError.Text = "Acceso denegado. Este canal es solo para personal operativo.";
+                        TxtMensajeError.Visibility = Visibility.Visible;
+                        return;
+                    }
                 }
             }
             

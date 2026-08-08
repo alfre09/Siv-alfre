@@ -1,4 +1,5 @@
 using Siv.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Siv.Application.Dtos;
@@ -23,11 +24,24 @@ public class VueloDto
 
 public class CrearVueloDto
 {
+    [Required]
+    [StringLength(10, MinimumLength = 3)]
+    [RegularExpression("^[a-zA-Z0-9]+$")]
     public string NumeroVuelo { get; set; } = string.Empty;
+
+    [Required]
     public int AerolineaId { get; set; }
+
+    [Required]
     public int AeropuertoOrigenId { get; set; }
+
+    [Required]
     public int AeropuertoDestinoId { get; set; }
+
+    [Required]
     public DateTime HorarioProgramado { get; set; }
+
+    [StringLength(5)]
     public string? Puerta { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public NivelVisibilidad NivelVisibilidad { get; set; } = NivelVisibilidad.Publico;
@@ -36,11 +50,25 @@ public class CrearVueloDto
 public class ActualizarVueloDto
 {
     public int VueloId { get; set; }
+    
+    [Required]
+    [StringLength(10, MinimumLength = 3)]
+    [RegularExpression("^[a-zA-Z0-9]+$")]
     public string NumeroVuelo { get; set; } = string.Empty;
+
+    [Required]
     public int AerolineaId { get; set; }
+
+    [Required]
     public int AeropuertoOrigenId { get; set; }
+
+    [Required]
     public int AeropuertoDestinoId { get; set; }
+
+    [Required]
     public DateTime HorarioProgramado { get; set; }
+
+    [StringLength(5)]
     public string? Puerta { get; set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
