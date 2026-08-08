@@ -76,4 +76,21 @@ public partial class MainViewModel : ViewModelBase
     {
         CurrentViewModel = _serviceProvider.GetRequiredService<HistorialEstadosViewModel>();
     }
+
+    [RelayCommand]
+    private void CerrarSesion()
+    {
+        TokenManager.Limpiar();
+        var loginWindow = _serviceProvider.GetRequiredService<Siv.Desktop.Views.LoginWindow>();
+        loginWindow.Show();
+
+        foreach (System.Windows.Window window in System.Windows.Application.Current.Windows)
+        {
+            if (window is Siv.Desktop.Views.MainWindow)
+            {
+                window.Close();
+                break;
+            }
+        }
+    }
 }

@@ -45,9 +45,15 @@ public abstract class ApiServicioBase
         {
         }
 
-        return new ExcepcionApi(
-            (int)respuesta.StatusCode,
-            "No se pudo completar la solicitud con el servicio de vuelos.");
+        var mensaje = respuesta.StatusCode switch
+        {
+            System.Net.HttpStatusCode.Unauthorized => "La sesión del Desktop expiró o el token no es válido. Cierra sesión y vuelve a iniciar sesión.",
+            System.Net.HttpStatusCode.Forbidden => "Tu rol no tiene permisos para realizar esta operación.",
+            System.Net.HttpStatusCode.NotFound => "El recurso solicitado no existe.",
+            _ => "No se pudo completar la solicitud con el servicio de vuelos."
+        };
+
+        return new ExcepcionApi((int)respuesta.StatusCode, mensaje);
     }
 }
 

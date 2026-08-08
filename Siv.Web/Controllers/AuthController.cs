@@ -51,10 +51,17 @@ public class AuthController : Controller
                 new("jwt", resultado.Token)
             };
 
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
+            };
+
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(new ClaimsIdentity(
-                    claims, CookieAuthenticationDefaults.AuthenticationScheme)));
+                    claims, CookieAuthenticationDefaults.AuthenticationScheme)),
+                authProperties);
 
             return RedirectToAction("Index", "Home");
         }

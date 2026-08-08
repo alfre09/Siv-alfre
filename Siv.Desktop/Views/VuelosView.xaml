@@ -9,16 +9,44 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Gestión de Vuelos" Style="{StaticResource TituloPagina}" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
+        <Border Grid.Row="1" Padding="12" Margin="0,0,0,12" Background="{StaticResource BrushSuperficie}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95"/><ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="95"/><ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Número" VerticalAlignment="Center" Margin="0,4" />
+                <TextBox Grid.Column="1" Text="{Binding NumeroVueloNuevo, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
+                <TextBlock Grid.Column="2" Text="Puerta" VerticalAlignment="Center" Margin="8,4,0,4" />
+                <TextBox Grid.Column="3" Text="{Binding PuertaNueva, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
+                <TextBlock Grid.Row="1" Text="Aerolínea" VerticalAlignment="Center" Margin="0,4" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Aerolineas}" DisplayMemberPath="Nombre" SelectedItem="{Binding AerolineaNueva}" Margin="5" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Origen" VerticalAlignment="Center" Margin="8,4,0,4" />
+                <ComboBox Grid.Row="1" Grid.Column="3" ItemsSource="{Binding Aeropuertos}" DisplayMemberPath="Nombre" SelectedItem="{Binding AeropuertoOrigenNuevo}" Margin="5" />
+                <TextBlock Grid.Row="2" Text="Destino" VerticalAlignment="Center" Margin="0,4" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Aeropuertos}" DisplayMemberPath="Nombre" SelectedItem="{Binding AeropuertoDestinoNuevo}" Margin="5" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Horario" VerticalAlignment="Center" Margin="8,4,0,4" />
+                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding HorarioProgramadoNuevo, UpdateSourceTrigger=PropertyChanged}" ToolTip="dd/MM/yyyy HH:mm" Margin="5" />
+                <TextBlock Grid.Row="3" Text="Visibilidad" VerticalAlignment="Center" Margin="0,4" />
+                <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding NivelesVisibilidad}" SelectedItem="{Binding NivelVisibilidadNuevo}" Margin="5" />
+                <Button Grid.Row="3" Grid.Column="3" Content="Crear vuelo" Command="{Binding CrearVueloCommand}" Style="{StaticResource BotonPrimario}" Margin="5" HorizontalAlignment="Right" />
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
             <Button Content="Refrescar" Command="{Binding CargarDatosCommand}" Style="{StaticResource BotonPrimario}" />
         </StackPanel>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Vuelos}" SelectedItem="{Binding VueloSeleccionado}">
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Vuelos}" SelectedItem="{Binding VueloSeleccionado}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Número" Binding="{Binding NumeroVuelo}" />
                 <DataGridTextColumn Header="Aerolínea" Binding="{Binding AerolineaNombre}" />

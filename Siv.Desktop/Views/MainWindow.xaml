@@ -56,6 +56,9 @@
                 <Button Content="📜 Historial de estados" Command="{Binding NavigateToHistorialEstadosCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarHistorial, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <Button Content="🔔 Notificaciones" Command="{Binding NavigateToNotificacionesCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarNotificaciones, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <Button Content="📜 Auditoría" Command="{Binding NavigateToAuditoriasCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarAuditoria, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <Separator Margin="10,20,10,20" Background="#444" />
+                <Button Content="🚪 Cerrar Sesión" Command="{Binding CerrarSesionCommand}" Style="{StaticResource BotonMenuNavegacion}" Foreground="#FF6B6B" />
             </StackPanel>
         </Border>
 

@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Http.Json;
+
 namespace Siv.Web.Configuracion;
 
 public sealed class ApiResilienciaHandler : DelegatingHandler
@@ -12,13 +15,18 @@ public sealed class ApiResilienciaHandler : DelegatingHandler
         }
         catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            throw new Siv.Web.Modelos.ExcepcionApi(
-                504, "La API tardó demasiado en responder.");
+            return CrearRespuestaError(HttpStatusCode.GatewayTimeout, "La API tardó demasiado en responder.");
         }
         catch (HttpRequestException)
         {
-            throw new Siv.Web.Modelos.ExcepcionApi(
-                503, "La API no está disponible. Verifica que el servicio esté iniciado.");
+            return CrearRespuestaError(HttpStatusCode.ServiceUnavailable,
+                "La API no está disponible. Verifica que el servicio esté iniciado.");
         }
     }
+
+    private static HttpResponseMessage CrearRespuestaError(HttpStatusCode estado, string mensaje) =>
+        new(estado)
+        {
+            Content = JsonContent.Create(new { mensaje })
+        };
 }

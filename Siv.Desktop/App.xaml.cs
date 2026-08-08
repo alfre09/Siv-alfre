@@ -36,6 +36,7 @@ public partial class App : Application
         services.AddSingleton(Configuration);
 
         services.AddTransient<TokenHandler>();
+        services.AddTransient<ApiResilienciaHandler>();
 
         // API base URL
         var urlBaseApi = Configuration["ApiDesktop:UrlBase"] 
@@ -48,15 +49,15 @@ public partial class App : Application
         }
 
         // HttpClientFactory + Services
-        services.AddHttpClient<IVueloApiServicio, VueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<IAerolineaApiServicio, AerolineaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<IAeropuertoApiServicio, AeropuertoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<IEstadoVueloApiServicio, EstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<ICambioOperativoApiServicio, CambioOperativoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<ISeguimientoApiServicio, SeguimientoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<INotificacionApiServicio, NotificacionApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<IHistorialEstadoVueloApiServicio, HistorialEstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
-        services.AddHttpClient<IAuditoriaApiServicio, AuditoriaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IVueloApiServicio, VueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IAerolineaApiServicio, AerolineaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IAeropuertoApiServicio, AeropuertoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IEstadoVueloApiServicio, EstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<ICambioOperativoApiServicio, CambioOperativoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<ISeguimientoApiServicio, SeguimientoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<INotificacionApiServicio, NotificacionApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IHistorialEstadoVueloApiServicio, HistorialEstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
+        services.AddHttpClient<IAuditoriaApiServicio, AuditoriaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         
         // HttpClient for Login (Auth)
         services.AddHttpClient("SivApi", ConfigurarCliente);

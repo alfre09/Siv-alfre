@@ -25,6 +25,7 @@ public class CrearVueloModelo
     public int AeropuertoDestinoId { get; set; }
     public DateTime HorarioProgramado { get; set; }
     public string? Puerta { get; set; }
+    public string NivelVisibilidad { get; set; } = "Publico";
 }
 
 public class ActualizarVueloModelo
