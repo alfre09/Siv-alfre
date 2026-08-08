@@ -45,12 +45,12 @@ public class VuelosController : Controller
     {
         try
         {
-            var vuelos = await _vueloApiServicio.ObtenerTodosAsync();
+            var vuelos = await _vueloApiServicio.ObtenerDisponiblesAsync(null, null, null);
             return View(vuelos);
         }
         catch (ExcepcionApi excepcion)
         {
-            _logger.LogWarning(excepcion, "No se pudo obtener el listado de vuelos para el tablero");
+            _logger.LogWarning(excepcion, "No se pudo obtener el listado de vuelos disponibles para el tablero");
             TempData["MensajeError"] = excepcion.Message;
             return View(new List<VueloViewModel>());
         }
