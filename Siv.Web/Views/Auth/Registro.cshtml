@@ -1,0 +1,51 @@
+@model Siv.Web.Modelos.RegistroViewModel
+@{
+    ViewData["Titulo"] = "Crear cuenta";
+}
+
+<div style="max-width: 480px; margin: 3rem auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="siv-eyebrow">Usuario registrado</span>
+        <h1>Crear cuenta</h1>
+        <p style="color: var(--siv-texto-suave);">Regístrate para reservar vuelos y recibir notificaciones.</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="siv-alerta siv-alerta--error">
+            <div>@Html.ValidationSummary(false, "", new { style = "list-style: none; padding: 0; margin: 0;" })</div>
+        </div>
+    }
+
+    <div class="siv-tarjeta">
+        <div class="siv-tarjeta__cuerpo" style="padding: 2rem;">
+            <form asp-action="Registro" method="post">
+                @Html.AntiForgeryToken()
+                <div class="siv-campo">
+                    <label asp-for="NombreUsuario"></label>
+                    <input asp-for="NombreUsuario" autocomplete="username" autofocus />
+                    <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+                </div>
+                <div class="siv-campo">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" autocomplete="new-password" />
+                    <span class="texto-ayuda">Mínimo 8 caracteres, con mayúscula, minúscula y número.</span>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="siv-campo">
+                    <label asp-for="ConfirmarPassword"></label>
+                    <input asp-for="ConfirmarPassword" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmarPassword" class="text-danger"></span>
+                </div>
+                <div class="siv-acciones-formulario">
+                    <button type="submit" class="siv-boton siv-boton--primario">Crear cuenta</button>
+                    <a asp-action="Login" class="siv-boton siv-boton--secundario">Ya tengo cuenta</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

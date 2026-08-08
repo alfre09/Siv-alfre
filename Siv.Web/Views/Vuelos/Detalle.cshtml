@@ -1,0 +1,141 @@
+@model DetalleVueloViewModel
+@{
+    ViewData["Titulo"] = $"Vuelo {Model.Vuelo.NumeroVuelo}";
+    var vuelo = Model.Vuelo;
+}
+
+<partial name="_Alertas" />
+
+<a asp-action="Index" style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; margin-bottom: 1.25rem;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Volver al tablero
+</a>
+
+<section class="siv-detalle-encabezado">
+    <span class="siv-hero__eyebrow">Vuelo @vuelo.NumeroVuelo</span>
+
+    <div class="siv-detalle-ruta">
+        <div class="siv-detalle-aeropuerto">
+            @vuelo.AeropuertoOrigenNombre
+            <span>Origen</span>
+        </div>
+        <svg class="siv-detalle-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <div class="siv-detalle-aeropuerto">
+            @vuelo.AeropuertoDestinoNombre
+            <span>Destino</span>
+        </div>
+    </div>
+
+    <div class="siv-detalle-datos">
+        <div class="siv-dato">
+            <span class="siv-dato-etiqueta">Aerolínea</span>
+            <span class="siv-dato-valor">@vuelo.AerolineaNombre</span>
+        </div>
+        <div class="siv-dato">
+            <span class="siv-dato-etiqueta">Horario programado</span>
+            <span class="siv-dato-valor">@vuelo.HorarioProgramado.ToString("dd MMM yyyy · HH:mm")</span>
+        </div>
+        <div class="siv-dato">
+            <span class="siv-dato-etiqueta">Puerta</span>
+            <span class="siv-dato-valor">@(string.IsNullOrWhiteSpace(vuelo.Puerta) ? "Sin asignar" : vuelo.Puerta)</span>
+        </div>
+        <div class="siv-dato">
+            <span class="siv-dato-etiqueta">Estado</span>
+            <partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" />
+        </div>
+    </div>
+</section>
+
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; align-items: start;">
+    <div class="siv-tarjeta">
+        <div class="siv-tarjeta__cuerpo">
+            <div class="siv-seccion-titulo">
+                <h2>Historial de cambios operativos</h2>
+            </div>
+
+            @if (Model.Cambios.Count == 0)
+            {
+                <div class="siv-vacio" style="padding: 2rem 1rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h3>Sin novedades</h3>
+                    <p>Este vuelo aún no ha tenido cambios operativos registrados.</p>
+                </div>
+            }
+            else
+            {
+                <ul class="siv-linea-tiempo">
+                    @foreach (var cambio in Model.Cambios)
+                    {
+                        <li>
+                            <span class="siv-cambio-tipo">@cambio.TipoCambio</span>
+                            @if (!string.IsNullOrWhiteSpace(cambio.ValorAnterior) || !string.IsNullOrWhiteSpace(cambio.ValorNuevo))
+                            {
+                                <p class="siv-cambio-valores" style="font-size: 0.9rem; margin-bottom: 0.3rem;">
+                                    De <strong>@cambio.ValorAnterior</strong> a <strong>@cambio.ValorNuevo</strong>
+                                </p>
+                            }
+                            <p class="siv-cambio-causa"><strong>Razón:</strong> @cambio.Causa</p>
+                            <span class="siv-cambio-fecha">@cambio.FechaCambio.ToString("dd MMM yyyy · HH:mm")</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="siv-tarjeta">
+            <div class="siv-tarjeta__cuerpo">
+                <div class="siv-seccion-titulo">
+                    <h2 style="font-size: 1.05rem;">Seguir este vuelo</h2>
+                </div>
+                <p style="color: var(--siv-texto-suave); font-size: 0.85rem; margin-top: -0.5rem;">
+                    Recibe notificaciones ante cualquier cambio operativo de este vuelo.
+                </p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                <form asp-action="Seguir" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="vueloId" value="@vuelo.VueloId" />
+                    <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">Usuario autenticado: <strong>@User.Identity?.Name</strong></p>
+                    <button type="submit" class="siv-boton siv-boton--acento siv-boton--bloque">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        Seguir vuelo
+                    </button>
+                </form>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="siv-boton siv-boton--primario siv-boton--bloque">Ingresa para seguir este vuelo</a>
+                }
+            </div>
+        </div>
+
+        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("UsuarioRegistrado") || User.IsInRole("Admin")))
+        {
+            <div class="siv-tarjeta">
+                <div class="siv-tarjeta__cuerpo">
+                    <div class="siv-seccion-titulo"><h2 style="font-size: 1.05rem;">Reservar este vuelo</h2></div>
+                    <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">La reserva es independiente del seguimiento de notificaciones.</p>
+                    <form asp-controller="Reservas" asp-action="Crear" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="vueloId" value="@vuelo.VueloId" />
+                        <button type="submit" class="siv-boton siv-boton--primario siv-boton--bloque">Reservar vuelo</button>
+                    </form>
+                </div>
+            </div>
+        }
+        else if (User.Identity?.IsAuthenticated != true)
+        {
+            <div class="siv-tarjeta">
+                <div class="siv-tarjeta__cuerpo">
+                    <div class="siv-seccion-titulo"><h2 style="font-size: 1.05rem;">¿Quieres reservar?</h2></div>
+                    <p style="color: var(--siv-texto-suave); font-size: 0.85rem;">Inicia sesión como usuario registrado para reservar este vuelo.</p>
+                    <a asp-controller="Auth" asp-action="Login" class="siv-boton siv-boton--primario siv-boton--bloque">Ingresar para reservar</a>
+                </div>
+            </div>
+        }
+
+
+    </div>
+</div>

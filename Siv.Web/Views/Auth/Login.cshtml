@@ -1,0 +1,54 @@
+@model Siv.Web.Modelos.LoginViewModel
+@{
+    ViewData["Titulo"] = "Iniciar Sesión";
+}
+
+<div style="max-width: 420px; margin: 3rem auto;">
+    <partial name="_Alertas" />
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; color: var(--siv-ambar); margin-bottom: 1rem;">
+            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.4l-.7.7c-.4.4-.3 1 .2 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.6 6c.3.5.9.6 1.3.2l.7-.7c.3-.3.5-.8.4-1.3Z" />
+        </svg>
+        <h2>Bienvenido a SIV</h2>
+        <p style="color: var(--siv-texto-suave);">Ingresa tus credenciales para acceder</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="siv-alerta siv-alerta--error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div>@Html.ValidationSummary(false, "", new { @class = "text-danger", style = "list-style: none; padding: 0; margin: 0;" })</div>
+        </div>
+    }
+
+    <div class="siv-tarjeta">
+        <div class="siv-tarjeta__cuerpo" style="padding: 2rem;">
+            <form asp-controller="Auth" asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <div class="siv-campo">
+                    <label for="usuario">Usuario</label>
+                    <input asp-for="Usuario" id="usuario" required autofocus />
+                    <span class="texto-ayuda">Perfiles disponibles: <strong>admin</strong>, <strong>alfre</strong>, <strong>operador1</strong>, <strong>cliente1</strong>, <strong>auditor1</strong></span>
+                </div>
+                
+                <div class="siv-campo">
+                    <label for="password">Contraseña</label>
+                    <input asp-for="Password" id="password" required />
+                    <span class="texto-ayuda">Usa la contraseña asignada a tu perfil.</span>
+                </div>
+                
+                <div class="siv-acciones-formulario" style="margin-top: 1.5rem; border-top: none; padding-top: 0;">
+                    <button type="submit" class="siv-boton siv-boton--primario siv-boton--bloque">
+                        Ingresar al Sistema
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 0.25rem;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    </button>
+                </div>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a asp-action="Registro">Crear una cuenta nueva</a>
+            </div>
+        </div>
+    </div>
+</div>

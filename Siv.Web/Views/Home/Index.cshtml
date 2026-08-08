@@ -1,0 +1,61 @@
+@model List<VueloViewModel>
+@{
+    ViewData["Titulo"] = "Inicio";
+}
+
+<section class="siv-hero">
+    <span class="siv-hero__eyebrow">Torre de control digital</span>
+    <h1>Sigue cada vuelo, en cada etapa, en tiempo real.</h1>
+    <p>
+        SIV centraliza la programación, los cambios operativos y el estado de cada vuelo,
+        para que aerolíneas y pasajeros tengan siempre información confiable.
+    </p>
+    <div class="siv-hero__acciones">
+        <a asp-controller="Vuelos" asp-action="Index" class="siv-boton siv-boton--acento">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.4l-.7.7c-.4.4-.3 1 .2 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.6 6c.3.5.9.6 1.3.2l.7-.7c.3-.3.5-.8.4-1.3Z" /></svg>
+            Ver todos los vuelos
+        </a>
+        <a asp-controller="Vuelos" asp-action="Crear" class="siv-boton siv-boton--secundario">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Registrar vuelo
+        </a>
+    </div>
+</section>
+
+<div class="siv-seccion-titulo">
+    <h2>Próximas salidas</h2>
+    <a asp-controller="Vuelos" asp-action="Index">Ver el tablero completo →</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="siv-tablero">
+        <div class="siv-tablero__vacio">No hay vuelos programados en este momento.</div>
+    </div>
+}
+else
+{
+    <div class="siv-tablero">
+        <div class="siv-tablero__cabecera">
+            <span>Vuelo</span>
+            <span>Ruta</span>
+            <span>Aerolínea</span>
+            <span>Horario</span>
+            <span>Estado</span>
+        </div>
+        @foreach (var vuelo in Model)
+        {
+            <a asp-controller="Vuelos" asp-action="Detalle" asp-route-id="@vuelo.VueloId" class="siv-tablero__fila">
+                <span class="siv-tablero__numero">@vuelo.NumeroVuelo</span>
+                <span class="siv-tablero__ruta">
+                    @vuelo.AeropuertoOrigenNombre
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    @vuelo.AeropuertoDestinoNombre
+                </span>
+                <span>@vuelo.AerolineaNombre</span>
+                <span class="siv-tablero__horario">@vuelo.HorarioProgramado.ToString("dd MMM · HH:mm")</span>
+                <partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" />
+            </a>
+        }
+    </div>
+}

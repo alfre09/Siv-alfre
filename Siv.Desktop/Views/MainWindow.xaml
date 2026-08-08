@@ -1,0 +1,63 @@
+<Window x:Class="Siv.Desktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Siv.Desktop.Views"
+        xmlns:viewModels="clr-namespace:Siv.Desktop.ViewModels"
+        mc:Ignorable="d"
+        Title="SIV - Sistema de Información de Vuelos" Height="768" Width="1024"
+        Background="{StaticResource BrushFondoOscuro}"
+        Foreground="{StaticResource BrushTextoClaro}"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModels:VuelosViewModel}">
+            <local:VuelosView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:AerolineasViewModel}">
+            <local:AerolineasView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:AeropuertosViewModel}">
+            <local:AeropuertosView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:CambiosOperativosViewModel}">
+            <local:CambiosOperativosView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:SeguimientosViewModel}">
+            <local:SeguimientosView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:NotificacionesViewModel}">
+            <local:NotificacionesView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:AuditoriasViewModel}">
+            <local:AuditoriasView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Menú Lateral -->
+        <Border Grid.Column="0" Background="{StaticResource BrushSuperficie}">
+            <StackPanel>
+                <TextBlock Text="SIV Desktop" FontSize="20" FontWeight="Bold" Margin="20,30,20,40" Foreground="{StaticResource BrushTextoClaro}" />
+                
+                <Button Content="✈️ Vuelos" Command="{Binding NavigateToVuelosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="🏢 Aerolíneas" Command="{Binding NavigateToAerolineasCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="📍 Aeropuertos" Command="{Binding NavigateToAeropuertosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="🔄 Cambios operativos" Command="{Binding NavigateToCambiosOperativosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="👁️ Seguimientos" Command="{Binding NavigateToSeguimientosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="🔔 Notificaciones" Command="{Binding NavigateToNotificacionesCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="📜 Auditoría" Command="{Binding NavigateToAuditoriasCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Contenido Principal -->
+        <Border Grid.Column="1" Padding="30">
+            <ContentControl Content="{Binding CurrentViewModel}" />
+        </Border>
+    </Grid>
+</Window>

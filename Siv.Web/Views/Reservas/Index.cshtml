@@ -1,0 +1,52 @@
+@model List<ReservaViewModel>
+@{
+    ViewData["Titulo"] = "Mis reservas";
+}
+
+<partial name="_Alertas" />
+
+<div class="siv-encabezado-pagina">
+    <div>
+        <span class="siv-eyebrow">Usuario registrado</span>
+        <h1>Mis reservas</h1>
+        <p>Consulta tus reservas y cancela las que ya no necesites.</p>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="siv-tarjeta"><div class="siv-vacio"><h3>Aún no tienes reservas</h3><p>Busca un vuelo disponible para comenzar.</p><a asp-controller="Disponibles" asp-action="Index" class="siv-boton siv-boton--primario">Buscar vuelos</a></div></div>
+}
+else
+{
+    <div class="siv-tarjeta">
+        <div class="siv-tabla-envoltorio">
+            <table class="siv-tabla">
+                <thead><tr><th>Vuelo</th><th>Ruta</th><th>Horario</th><th>Reserva</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var reserva in Model)
+                {
+                    <tr>
+                        <td><span class="siv-codigo">@reserva.NumeroVuelo</span></td>
+                        <td>@reserva.Origen → @reserva.Destino</td>
+                        <td>@reserva.HorarioProgramado.ToString("dd MMM yyyy · HH:mm")</td>
+                        <td>@reserva.FechaReserva.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td>@reserva.Estado</td>
+                        <td>
+                            <a asp-controller="Vuelos" asp-action="Detalle" asp-route-id="@reserva.VueloId" class="siv-boton siv-boton--secundario siv-boton--chico">Ver vuelo</a>
+                            @if (reserva.Estado.Equals("Activa", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <form asp-action="Cancelar" method="post" style="display:inline;" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@reserva.ReservaId" />
+                                    <button type="submit" class="siv-boton siv-boton--peligro siv-boton--chico">Cancelar</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

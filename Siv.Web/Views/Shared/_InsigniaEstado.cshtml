@@ -1,0 +1,14 @@
+@model string
+@{
+    var claseVariante = (Model ?? string.Empty).ToLowerInvariant() switch
+    {
+        "programado" => "programado",
+        "embarcando" => "embarcando",
+        "en vuelo" => "en-vuelo",
+        "aterrizado" => "aterrizado",
+        "cancelado" => "cancelado",
+        _ => "programado"
+    };
+    var prefijoClase = ViewData["prefijoClase"] as string ?? "siv-insignia";
+}
+<span class="@prefijoClase @prefijoClase--@claseVariante">@Model</span>

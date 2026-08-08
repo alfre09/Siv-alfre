@@ -1,0 +1,15 @@
+@model ErrorViewModel
+@{
+    ViewData["Titulo"] = "Ocurrió un error";
+}
+
+<div class="siv-vacio">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>Ocurrió un error al procesar la solicitud</h3>
+    <p>Intenta de nuevo en unos momentos. Si el problema persiste, contacta al administrador del sistema.</p>
+    @if (Model.MostrarIdSolicitud)
+    {
+        <p class="siv-eyebrow">ID de solicitud: @Model.RequestId</p>
+    }
+    <a asp-controller="Home" asp-action="Index" class="siv-boton siv-boton--primario">Volver al inicio</a>
+</div>

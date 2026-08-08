@@ -1,0 +1,111 @@
+using Microsoft.Extensions.Logging;
+using Siv.Application.Dtos;
+using Siv.Application.Interfaces;
+using Siv.Application.Mapeadores;
+using Siv.Domain.Entidades;
+using Siv.Domain.Repositorios;
+
+namespace Siv.Application.Servicios;
+
+public class NotificacionServicio : INotificacionServicio
+{
+    private readonly IUnitOfWork _unidadDeTrabajo;
+    private readonly IAuditoriaServicio _auditoriaServicio;
+    private readonly INotificadorTiempoReal _notificadorTiempoReal;
+    private readonly ILogger<NotificacionServicio> _logger;
+
+    public NotificacionServicio(IUnitOfWork unidadDeTrabajo, IAuditoriaServicio auditoriaServicio, INotificadorTiempoReal notificadorTiempoReal, ILogger<NotificacionServicio> logger)
+    {
+        _unidadDeTrabajo = unidadDeTrabajo;
+        _auditoriaServicio = auditoriaServicio;
+        _notificadorTiempoReal = notificadorTiempoReal;
+        _logger = logger;
+    }
+
+    public async Task<List<NotificacionDto>> ObtenerTodosAsync()
+    {
+        _logger.LogInformation("Obteniendo todas las notificaciones");
+        var notificaciones = await _unidadDeTrabajo.Notificaciones.ObtenerTodosAsync();
+        return notificaciones
+            .OrderByDescending(n => n.FechaEnvio)
+            .Select(n => n.ADto())
+            .ToList();
+    }
+
+    public async Task<List<NotificacionDto>> ObtenerPorUsuarioAsync(string usuario)
+    {
+        _logger.LogInformation("Obteniendo notificaciones para el usuario {Usuario}", usuario);
+        if (string.IsNullOrWhiteSpace(usuario))
+            return new List<NotificacionDto>();
+
+        var notificaciones = await _unidadDeTrabajo.Notificaciones.ObtenerPorUsuarioAsync(usuario.Trim());
+        return notificaciones
+            .OrderByDescending(n => n.FechaEnvio)
+            .Select(n => n.ADto())
+            .ToList();
+    }
+
+    public async Task<List<NotificacionDto>> ObtenerPorVueloAsync(int vueloId)
+    {
+        _logger.LogInformation("Obteniendo notificaciones para el vuelo {VueloId}", vueloId);
+        var notificaciones = await _unidadDeTrabajo.Notificaciones.ObtenerPorVueloAsync(vueloId);
+        return notificaciones
+            .OrderByDescending(n => n.FechaEnvio)
+            .Select(n => n.ADto())
+            .ToList();
+    }
+
+    public async Task MarcarComoLeidaAsync(int notificacionId, string usuario)
+    {
+        _logger.LogInformation("Marcando notificación {Id} como leída", notificacionId);
+        var notificacion = await _unidadDeTrabajo.Notificaciones.ObtenerPorIdAsync(notificacionId);
+
+        if (notificacion == null ||
+            !notificacion.Usuario.Equals(usuario, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("No se encontró la notificación con id {Id} para marcar como leída.", notificacionId);
+            return;
+        }
+
+        notificacion.MarcarComoLeida();
+
+        _unidadDeTrabajo.Notificaciones.Actualizar(notificacion);
+        await _unidadDeTrabajo.GuardarCambiosAsync();
+
+        await _auditoriaServicio.RegistrarAsync(
+            "Actualizar", "Notificaciones", $"Notificación {notificacion.Id} marcada como leída.");
+    }
+
+    public async Task GenerarNotificacionesPorCambioAsync(int vueloId, int cambioOperativoId, string mensaje)
+    {
+        _logger.LogInformation("Iniciando generación de notificaciones para vuelo {VueloId}, cambio {CambioId}", vueloId, cambioOperativoId);
+        if (cambioOperativoId <= 0)
+        {
+            _logger.LogWarning("Fallo al generar notificaciones: El cambio operativo debe ser válido ({CambioId}).", cambioOperativoId);
+            throw new ArgumentException("El cambio operativo debe ser válido.", nameof(cambioOperativoId));
+        }
+
+        var interesados = await _unidadDeTrabajo.Seguimientos.ObtenerUsuariosInteresadosAsync(vueloId);
+
+        if (interesados.Count == 0)
+            return;
+
+        var notificaciones = interesados
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(usuario => new Notificacion(vueloId, cambioOperativoId, usuario, mensaje))
+            .ToList();
+
+        await _unidadDeTrabajo.Notificaciones.AgregarRangoAsync(notificaciones);
+        await _unidadDeTrabajo.GuardarCambiosAsync();
+
+        // Enviar notificaciones en tiempo real a cada usuario interesado
+        foreach (var usuario in interesados.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            await _notificadorTiempoReal.EnviarNotificacionAsync(usuario, mensaje);
+        }
+
+        await _auditoriaServicio.RegistrarAsync(
+            "Generar", "Notificaciones",
+            $"Se generaron {notificaciones.Count} notificación(es) para el cambio operativo {cambioOperativoId} del vuelo {vueloId}.");
+    }
+}

@@ -1,0 +1,90 @@
+@model List<Siv.Web.Modelos.NotificacionViewModel>
+@{
+    ViewData["Titulo"] = "Notificaciones";
+    var usuarioBusqueda = ViewData["Usuario"] as string;
+}
+
+<partial name="_Alertas" />
+
+<div class="siv-encabezado-pagina">
+    <div>
+        <span class="siv-eyebrow">Avisos</span>
+        <h1>Mis notificaciones</h1>
+        <p>Revisa las notificaciones de los vuelos que estás siguiendo.</p>
+    </div>
+</div>
+
+<div class="siv-tarjeta" style="margin-bottom: 2rem;">
+    <div class="siv-tarjeta__cuerpo">
+        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+            <div class="siv-campo" style="flex: 1; max-width: 300px; margin-bottom: 0;">
+                <label for="usuario">Tu usuario autenticado</label>
+                <input type="text" id="usuario" value="@usuarioBusqueda" class="form-control" readonly />
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(usuarioBusqueda))
+{
+    if (Model == null || Model.Count == 0)
+    {
+        <div class="siv-tarjeta">
+            <div class="siv-vacio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <h3>Sin notificaciones</h3>
+                <p>No tienes notificaciones en este momento.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="siv-tarjeta">
+            <div class="siv-tabla-envoltorio">
+                <table class="siv-tabla">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Mensaje</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var notificacion in Model)
+                        {
+                            <tr>
+                                <td>@notificacion.FechaEnvio.ToString("dd MMM yyyy · HH:mm")</td>
+                                <td>@notificacion.Mensaje</td>
+                                <td>
+                                    @if (notificacion.Leida)
+                                    {
+                                        <span class="siv-insignia siv-insignia--gris">Leída</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="siv-insignia siv-insignia--naranja">Nueva</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!notificacion.Leida)
+                                    {
+                                        <form method="post" asp-action="MarcarLeida">
+                                            <input type="hidden" name="id" value="@notificacion.NotificacionId" />
+                                            <button type="submit" class="siv-boton siv-boton--secundario siv-boton--chico">
+                                                Marcar leída
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

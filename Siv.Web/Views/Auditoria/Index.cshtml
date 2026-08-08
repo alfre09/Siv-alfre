@@ -1,0 +1,40 @@
+@model List<AuditoriaViewModel>
+@{
+    ViewData["Titulo"] = "Auditoría";
+}
+
+<partial name="_Alertas" />
+
+<div class="siv-encabezado-pagina">
+    <div>
+        <span class="siv-eyebrow">Control institucional</span>
+        <h1>Auditoría del sistema</h1>
+        <p>Consulta de solo lectura sobre las operaciones registradas en el SIV.</p>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="siv-tarjeta"><div class="siv-vacio"><h3>No hay registros de auditoría</h3><p>Las operaciones aparecerán aquí cuando se registren.</p></div></div>
+}
+else
+{
+    <div class="siv-tarjeta">
+        <div class="siv-tabla-envoltorio">
+            <table class="siv-tabla">
+                <thead><tr><th>Fecha</th><th>Acción</th><th>Tabla</th><th>Descripción</th></tr></thead>
+                <tbody>
+                @foreach (var registro in Model)
+                {
+                    <tr>
+                        <td>@registro.Fecha.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td>@registro.Accion</td>
+                        <td>@registro.Tabla</td>
+                        <td>@registro.Descripcion</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

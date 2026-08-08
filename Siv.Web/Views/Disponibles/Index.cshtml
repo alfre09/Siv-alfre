@@ -1,0 +1,105 @@
+@model DisponiblesViewModel
+@{
+    ViewData["Titulo"] = "Vuelos disponibles";
+}
+
+<partial name="_Alertas" />
+
+<div class="siv-encabezado-pagina">
+    <div>
+        <span class="siv-eyebrow">Consulta pública</span>
+        <h1>Vuelos disponibles</h1>
+        <p>Busca vuelos públicos que todavía están programados y reserva el que necesites.</p>
+    </div>
+</div>
+
+<div class="siv-tarjeta" style="margin-bottom: 1.5rem;">
+    <div class="siv-tarjeta__cuerpo">
+        <form method="get" asp-action="Index" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; align-items: end;">
+            <div class="siv-campo">
+                <label for="origenId">Origen</label>
+                <select id="origenId" name="origenId">
+                    <option value="">Todos los orígenes</option>
+                    @foreach (var aeropuerto in Model.Aeropuertos)
+                    {
+                        if (Model.OrigenId == aeropuerto.AeropuertoId)
+                        {
+                            <option value="@aeropuerto.AeropuertoId" selected>@aeropuerto.Codigo — @aeropuerto.Nombre</option>
+                        }
+                        else
+                        {
+                            <option value="@aeropuerto.AeropuertoId">@aeropuerto.Codigo — @aeropuerto.Nombre</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="siv-campo">
+                <label for="destinoId">Destino</label>
+                <select id="destinoId" name="destinoId">
+                    <option value="">Todos los destinos</option>
+                    @foreach (var aeropuerto in Model.Aeropuertos)
+                    {
+                        if (Model.DestinoId == aeropuerto.AeropuertoId)
+                        {
+                            <option value="@aeropuerto.AeropuertoId" selected>@aeropuerto.Codigo — @aeropuerto.Nombre</option>
+                        }
+                        else
+                        {
+                            <option value="@aeropuerto.AeropuertoId">@aeropuerto.Codigo — @aeropuerto.Nombre</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="siv-campo">
+                <label for="fecha">Fecha</label>
+                <input id="fecha" type="date" name="fecha" value="@(Model.Fecha?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="siv-acciones-formulario" style="border-top: 0; padding-top: 0; align-self: end;">
+                <button type="submit" class="siv-boton siv-boton--primario">Buscar</button>
+                <a asp-action="Index" class="siv-boton siv-boton--secundario">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Vuelos.Count == 0)
+{
+    <div class="siv-tarjeta">
+        <div class="siv-vacio">
+            <h3>No hay vuelos disponibles</h3>
+            <p>Prueba con otra fecha, ruta o revisa más tarde.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="siv-tarjeta">
+        <div class="siv-tabla-envoltorio">
+            <table class="siv-tabla">
+                <thead>
+                    <tr>
+                        <th>Vuelo</th>
+                        <th>Ruta</th>
+                        <th>Aerolínea</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vuelo in Model.Vuelos)
+                    {
+                        <tr>
+                            <td><span class="siv-codigo">@vuelo.NumeroVuelo</span></td>
+                            <td>@vuelo.AeropuertoOrigenNombre → @vuelo.AeropuertoDestinoNombre</td>
+                            <td>@vuelo.AerolineaNombre</td>
+                            <td>@vuelo.HorarioProgramado.ToString("dd MMM yyyy · HH:mm")</td>
+                            <td><partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" /></td>
+                            <td><a asp-controller="Vuelos" asp-action="Detalle" asp-route-id="@vuelo.VueloId" class="siv-boton siv-boton--secundario siv-boton--chico">Ver detalle</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

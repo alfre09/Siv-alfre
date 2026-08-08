@@ -1,0 +1,88 @@
+using System.IO;
+using System.Net.Http;
+using System.Windows;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Siv.Desktop.Interfaces;
+using Siv.Desktop.Servicios;
+using Siv.Desktop.ViewModels;
+using Siv.Desktop.Views;
+
+namespace Siv.Desktop;
+
+public partial class App : Application
+{
+    public IServiceProvider ServiceProvider { get; private set; }
+    public IConfiguration Configuration { get; private set; }
+
+    public App()
+    {
+        // Setup configuration
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+        Configuration = builder.Build();
+        
+        // Setup DI
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        ServiceProvider = services.BuildServiceProvider();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Configuración
+        services.AddSingleton(Configuration);
+
+        services.AddTransient<TokenHandler>();
+
+        // API base URL
+        var urlBaseApi = Configuration["ApiDesktop:UrlBase"] 
+            ?? "https://localhost:7201"; // Fallback port
+
+        void ConfigurarCliente(HttpClient cliente)
+        {
+            cliente.BaseAddress = new Uri(urlBaseApi);
+            cliente.DefaultRequestHeaders.Add("Accept", "application/json");
+        }
+
+        // HttpClientFactory + Services
+        services.AddHttpClient<IVueloApiServicio, VueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IAerolineaApiServicio, AerolineaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IAeropuertoApiServicio, AeropuertoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IEstadoVueloApiServicio, EstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<ICambioOperativoApiServicio, CambioOperativoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<ISeguimientoApiServicio, SeguimientoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<INotificacionApiServicio, NotificacionApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IHistorialEstadoVueloApiServicio, HistorialEstadoVueloApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        services.AddHttpClient<IAuditoriaApiServicio, AuditoriaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>();
+        
+        // HttpClient for Login (Auth)
+        services.AddHttpClient("SivApi", ConfigurarCliente);
+
+        // ViewModels
+        services.AddTransient<VuelosViewModel>();
+        services.AddTransient<CambiosOperativosViewModel>();
+        services.AddTransient<AerolineasViewModel>();
+        services.AddTransient<AeropuertosViewModel>();
+        services.AddTransient<SeguimientosViewModel>();
+        services.AddTransient<NotificacionesViewModel>();
+        services.AddTransient<AuditoriasViewModel>();
+        
+        // Singleton para MainViewModel porque maneja la navegación principal
+        services.AddSingleton<MainViewModel>();
+
+        // Views
+        services.AddTransient<MainWindow>();
+        services.AddTransient<LoginWindow>();
+    }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
+        loginWindow.Show();
+    }
+}

@@ -1,0 +1,63 @@
+@model List<VueloViewModel>
+@{
+    ViewData["Titulo"] = "Vuelos";
+}
+
+<partial name="_Alertas" />
+
+<div class="siv-encabezado-pagina">
+    <div>
+        <span class="siv-eyebrow">Tablero</span>
+        <h1>Vuelos</h1>
+        <p>Listado general de vuelos. Selecciona un vuelo para ver sus detalles o hacer seguimiento.</p>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="siv-tarjeta">
+        <div class="siv-vacio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.4l-.7.7c-.4.4-.3 1 .2 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.6 6c.3.5.9.6 1.3.2l.7-.7c.3-.3.5-.8.4-1.3Z" /></svg>
+            <h3>Todavía no hay vuelos registrados</h3>
+            <p>Registra el primer vuelo para comenzar a darle seguimiento operativo.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="siv-tarjeta">
+        <div class="siv-tabla-envoltorio">
+            <table class="siv-tabla">
+                <thead>
+                    <tr>
+                        <th>Vuelo</th>
+                        <th>Aerolínea</th>
+                        <th>Ruta</th>
+                        <th>Horario</th>
+                        <th>Puerta</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vuelo in Model)
+                    {
+                        <tr>
+                            <td><span class="siv-codigo">@vuelo.NumeroVuelo</span></td>
+                            <td>@vuelo.AerolineaNombre</td>
+                            <td>@vuelo.AeropuertoOrigenNombre → @vuelo.AeropuertoDestinoNombre</td>
+                            <td>@vuelo.HorarioProgramado.ToString("dd MMM yyyy · HH:mm")</td>
+                            <td>@(string.IsNullOrWhiteSpace(vuelo.Puerta) ? "—" : vuelo.Puerta)</td>
+                            <td>
+                                <partial name="_InsigniaEstado" model="@vuelo.EstadoVueloNombre" view-data='new ViewDataDictionary(ViewData) { ["prefijoClase"] = "siv-insignia-clara" }' />
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <a asp-action="Detalle" asp-route-id="@vuelo.VueloId" class="siv-boton siv-boton--secundario siv-boton--chico">Ver detalle</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
