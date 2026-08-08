@@ -1,140 +1,100 @@
-# SIV — Sistema de Información de Vuelos
+# Sistema de Información de Vuelos (SIV) ✈️
 
-Refactor completo del proyecto original bajo arquitectura **n-layer**, principios **SOLID**
-y separación estricta de responsabilidades entre capas. Backend en español (dominio, casos
-de uso, nombres de clases y variables), código en inglés donde aplica (nombres reservados de
-frameworks, atributos, etc.). Sin comentarios en el código, como fue solicitado.
+Este es el repositorio oficial del **Sistema de Información de Vuelos (SIV)**, una solución integral desarrollada bajo los principios de **Clean Architecture** (Arquitectura Limpia) para la gestión, seguimiento y notificación en tiempo real de operaciones aeroportuarias.
 
-## Estado de esta entrega
+El sistema está dividido en múltiples aplicaciones y capas para garantizar separación de responsabilidades (SoC), escalabilidad y un estricto control de acceso basado en roles (RBAC).
 
-Esta entrega incluye la solución completa **con el cliente web funcional**:
+---
 
-| Proyecto            | Estado      | Descripción                                                        |
-|---------------------|-------------|---------------------------------------------------------------------|
-| `Siv.Domain`        | ✅ Completo | Entidades con comportamiento, interfaces de repositorio, reglas.   |
-| `Siv.Application`   | ✅ Completo | DTOs, servicios de aplicación, mapeadores, excepciones.            |
-| `Siv.Persistence`   | ✅ Completo | DbContext, `EntityTypeConfiguration`, repositorios, migraciones.   |
-| `Siv.Api.Desktop`   | ✅ Completo | API REST para el futuro cliente de escritorio (WPF).               |
-| `Siv.Api.Web`       | ✅ Completo | API REST (BFF) para el cliente web, contratos reducidos.           |
-| `Siv.Web`           | ✅ Completo | Cliente ASP.NET Core MVC que consume `Siv.Api.Web`.                |
-| `Siv.Desktop`       | ⏳ Pendiente | Cliente WPF (.NET 9) que consumirá `Siv.Api.Desktop`. Se entrega en la siguiente iteración. |
+## 🏗 Arquitectura y Estructura del Proyecto
 
-## Arquitectura
+El sistema está dividido en las siguientes capas (Clean Architecture):
 
-```
-Siv.Domain            → Entidades, reglas de negocio, interfaces de repositorio (sin dependencias)
-Siv.Application        → Casos de uso, DTOs, servicios de aplicación (depende de Domain)
-Siv.Persistence         → EF Core, DbContext, EntityTypeConfiguration, repositorios (depende de Domain)
-Siv.Api.Desktop          → API REST para el cliente de escritorio (depende de Application y Persistence)
-Siv.Api.Web               → API REST para el cliente web (depende de Application y Persistence)
-Siv.Web                     → ASP.NET Core MVC, consume Siv.Api.Web vía HttpClient
-Siv.Desktop (pendiente)      → WPF .NET 9, consumirá Siv.Api.Desktop vía HttpClient
-```
+- **Siv.Domain:** Entidades centrales del negocio (Vuelo, Puerta, Auditoría, Usuario, etc.) y las interfaces de los repositorios.
+- **Siv.Application:** Lógica de negocio, casos de uso (Servicios), DTOs y validaciones.
+- **Siv.Persistence:** Configuración de Entity Framework Core, DbContext, migraciones y repositorios concretos.
+- **Siv.Api.Web:** API principal para exponer los datos a la aplicación Web. Contiene el Hub de SignalR (`NotificacionesHub`) para la comunicación en tiempo real.
+- **Siv.Api.Desktop:** API secundaria diseñada exclusivamente para procesar las operaciones que vienen desde la aplicación de escritorio y comunicarse con la API Web.
+- **Siv.Web:** Aplicación frontend (ASP.NET Core MVC) que simula el "Tablero del Aeropuerto", visible para los pasajeros y personal.
+- **Siv.Desktop:** Aplicación frontend (WPF) para la administración operativa interna del aeropuerto.
 
-Ambas APIs comparten la misma base de datos (`SivDb` por defecto) para que los cambios
-operativos registrados desde cualquiera de los dos clientes se reflejen en el otro.
+---
 
-### Principios aplicados
+## 🔐 Roles y Credenciales (RBAC)
 
-- **SRP**: los servicios de aplicación orquestan; las reglas de negocio (transición de
-  estados, validación de cambios operativos) viven en la entidad `Vuelo`, no en los servicios.
-- **OCP/DIP**: `Siv.Application` y `Siv.Persistence` dependen de interfaces definidas en
-  `Siv.Domain` (`IUnitOfWork`, `IVueloRepositorio`, etc.), nunca al revés.
-- **ISP**: los DTOs de escritura están separados por operación (`CrearVueloDto`,
-  `ActualizarVueloDto`, `RegistrarCambioPuertaDto`, etc.) en vez de un único modelo con
-  campos opcionales según el caso.
-- Los controladores de `Siv.Web` **nunca llaman HTTP directamente**: siempre pasan por un
-  "servicio de consumo de API" (`IVueloApiServicio`, etc.), tal como exige el lineamiento de
-  la capa de presentación.
+El sistema soporta 3 roles con accesos y permisos distintos. Al ejecutar el proyecto por primera vez, la base de datos (LocalDB) se siembra automáticamente con estos usuarios de prueba:
 
-## Requisitos previos
+| Rol | Usuario | Contraseña | Descripción |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `admin` | `Admin123!` | Acceso total al sistema, configuración de vuelos, usuarios y visibilidad. |
+| **Operador** | `operador1` | `Operador123!` | Puede realizar **Cambios Operativos** (ej. cambiar puerta de embarque, actualizar estado del vuelo). |
+| **Auditor** | `auditor1` | `Auditor123!` | Acceso de solo lectura al módulo de **Auditorías** para revisar el historial de cambios. |
 
-- .NET SDK 9.0 o superior
-- SQL Server (LocalDB, Express o completo) — o ajustar la cadena de conexión a otro motor
-- Visual Studio 2022 (17.11+) o `dotnet` CLI
+---
 
-> Este proyecto fue generado sin acceso a un entorno con SDK de .NET instalado, por lo que
-> **no fue compilado ni verificado automáticamente**. Es muy probable que compile sin
-> problemas dado que se siguió con rigor la sintaxis de .NET 9 / EF Core 9, pero al abrirlo
-> revisa la lista de verificación al final de este documento.
+## ✨ Características Principales
 
-## Cómo ejecutar
+*   **Tablero de Vuelos en Tiempo Real:** Interfaz web que muestra los vuelos organizados, simulando las pantallas físicas de un aeropuerto.
+*   **Comunicación Bidireccional (SignalR):** Cualquier cambio operativo realizado desde el Escritorio (ej. cambio de puerta) se refleja instantáneamente en la Web sin recargar la página.
+*   **Auditoría Estricta:** Registro de "Valor Anterior" y "Valor Nuevo" por cada cambio operativo, asegurando la trazabilidad.
+*   **Gestor de Puertas de Embarque:** Validación estricta para asignar vuelos únicamente a puertas existentes y disponibles.
+*   **Inyección de Dependencias & SOLID:** Código altamente mantenible, escalable y preparado para pruebas unitarias.
 
-Para la aplicaciÃ³n web solo es necesario iniciar `Siv.Api.Web` y `Siv.Web`.
-`Siv.Api.Desktop` y `Siv.Desktop` corresponden al flujo de escritorio independiente.
+---
 
-### 1. Restaurar paquetes
+## 🚀 Guía de Ejecución Local
 
-Abre `Siv.sln` en Visual Studio y espera a que restaure los paquetes NuGet automáticamente,
-o desde la terminal, en la carpeta raíz:
+### Prerrequisitos
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (o superior).
+- SQL Server LocalDB (incluido con Visual Studio).
 
-```bash
-dotnet restore Siv.sln
-```
+### Pasos para iniciar el sistema
 
-### 2. Configurar la cadena de conexión
+Debido a que el proyecto consta de múltiples aplicaciones, es necesario iniciarlas en el orden correcto para evitar conflictos de inicialización en la base de datos:
 
-Por defecto, ambas APIs apuntan a:
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/alfre09/Siv-alfre.git
+   cd Siv-alfre
+   ```
 
-```
-Server=(localdb)\mssqllocaldb;Database=SivDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True
-```
+2. **Ejecutar la API Web (Inicializa la BD):**
+   ```bash
+   cd Siv.Api.Web
+   dotnet run
+   ```
+   *(Espera a que diga "Now listening on..." para asegurar que la base de datos y los datos semilla se hayan creado).*
 
-Ajusta `Siv.Api.Desktop/appsettings.json` y `Siv.Api.Web/appsettings.json` si usas otro
-servidor de SQL Server.
+3. **Ejecutar las demás aplicaciones (En terminales separadas):**
+   - **API Desktop:**
+     ```bash
+     cd Siv.Api.Desktop
+     dotnet run
+     ```
+   - **Aplicación Web (Tablero):**
+     ```bash
+     cd Siv.Web
+     dotnet run
+     ```
+   - **Aplicación WPF (Escritorio):**
+     ```bash
+     cd Siv.Desktop
+     dotnet run
+     ```
 
-### 3. Migraciones
+Una vez en ejecución:
+- La Web estará disponible en: `http://localhost:5100`
+- La App de Escritorio (WPF) abrirá su ventana nativa de Login.
 
-Las migraciones ya están incluidas (`Siv.Persistence/Migraciones/CreacionInicial`). **Ambas
-APIs aplican las migraciones automáticamente al iniciar** (`Database.MigrateAsync()` en
-`Program.cs`), junto con el sembrado de datos iniciales (aerolíneas, aeropuertos y estados
-de vuelo).
+---
 
-Si prefieres generarlas de nuevo desde cero (recomendado si haces cambios al modelo), desde
-la carpeta raíz:
+## 🛠 Tecnologías Utilizadas
 
-```bash
-dotnet ef migrations add CreacionInicial --project Siv.Persistence --startup-project Siv.Api.Web
-dotnet ef database update --project Siv.Persistence --startup-project Siv.Api.Web
-```
+- **Backend:** C#, .NET 8, ASP.NET Core Web API
+- **Frontend Web:** ASP.NET Core MVC, Razor Pages, Bootstrap, SignalR (JS)
+- **Frontend Desktop:** WPF (Windows Presentation Foundation), MVVM
+- **Base de Datos:** Entity Framework Core (Code-First), SQL Server (LocalDB)
+- **Arquitectura:** Clean Architecture, Patrón Repositorio, Unit of Work
 
-### 4. Ejecutar los proyectos
-
-Debes iniciar **la API primero, y luego el cliente que la consume**:
-
-1. `Siv.Api.Web` → arranca en `https://localhost:7200` (Swagger disponible en `/swagger`)
-2. `Siv.Web` → arranca en `https://localhost:7100`, consume la API en el puerto 7200
-
-En Visual Studio, puedes configurar **"varios proyectos de inicio"** (clic derecho en la
-solución → Propiedades → Varios proyectos de inicio) y marcar `Siv.Api.Web` y `Siv.Web`
-como "Iniciar", para levantarlos juntos con F5.
-
-`Siv.Desktop` usa `Siv.Api.Desktop` (puerto 7201). Para probar cambios operativos y notificaciones, inicia primero la API y luego el cliente de escritorio.
-
-## Estructura de carpetas relevante
-
-```
-Siv.Web/
-├── Controllers/          → VuelosController, HomeController
-├── Interfaces/            → Contratos de los servicios de consumo de API
-├── Servicios/               → Implementaciones HttpClient de esos contratos
-├── Modelos/                   → ViewModels específicos del cliente web
-├── Configuracion/               → Registro de HttpClientFactory tipado
-├── Views/                          → Razor views (Home, Vuelos, Shared)
-└── wwwroot/css/siv.css               → Sistema de diseño (paleta, componentes)
-```
-
-## Lista de verificación al abrir en Visual Studio
-
-- [x] Restaurar paquetes NuGet (`dotnet restore` o automático al abrir la solución)
-- [x] Solución configurada para .NET 9
-- [x] Cadena de conexión documentada en ambas APIs
-- [x] Solución con proyectos de dominio, aplicación, persistencia, APIs, web y escritorio
-- [x] Migraciones y sembrado de datos incluidos
-- [x] Cliente web MVC y cliente WPF incluidos
-
-## Próxima entrega
-
-`Siv.Desktop` (WPF, .NET 9) consumiendo `Siv.Api.Desktop`, siguiendo el mismo patrón de
-separación (ViewModels, servicios de consumo de API, sin lógica de negocio en la capa de
-presentación).
+---
+*Desarrollado como Proyecto Final del Sistema de Información de Vuelos.*
