@@ -7,7 +7,7 @@ namespace Siv.Api.Desktop.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Auditor")]
 public class AuditoriasController : ControllerBase
 {
     private readonly IAuditoriaServicio _auditoriaServicio;

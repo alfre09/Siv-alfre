@@ -9,13 +9,13 @@ using Siv.Persistence;
 
 namespace Siv.Tests.Integracion;
 
-public sealed class SivApiWebFactory : WebApplicationFactory<WebProgramMarker>
+public sealed class SivApiDesktopFactory : WebApplicationFactory<DesktopProgramMarker>
 {
     private readonly string _nombreBase;
 
-    public SivApiWebFactory(string? nombreBase = null)
+    public SivApiDesktopFactory(string nombreBase)
     {
-        _nombreBase = nombreBase ?? $"SivTests_{Guid.NewGuid():N}";
+        _nombreBase = nombreBase;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -39,7 +39,7 @@ public sealed class SivApiWebFactory : WebApplicationFactory<WebProgramMarker>
         });
     }
 
-    public async Task<int> CrearVueloAsync(bool conCambio = false)
+    public async Task<int> CrearVueloAsync()
     {
         using var alcance = Services.CreateScope();
         var contexto = alcance.ServiceProvider.GetRequiredService<SivDbContext>();
@@ -49,7 +49,6 @@ public sealed class SivApiWebFactory : WebApplicationFactory<WebProgramMarker>
         var aerolinea = new Aerolinea("IT", "Integration Test Airways");
         var origen = new Aeropuerto("TST", "Aeropuerto de prueba", "Pruebas", "Bolivia");
         var destino = new Aeropuerto("TST2", "Aeropuerto destino", "Pruebas", "Bolivia");
-
         contexto.EstadosVuelo.Add(estado);
         contexto.Aerolineas.Add(aerolinea);
         contexto.Aeropuertos.AddRange(origen, destino);
@@ -66,18 +65,6 @@ public sealed class SivApiWebFactory : WebApplicationFactory<WebProgramMarker>
             NivelVisibilidad.Publico);
         contexto.Vuelos.Add(vuelo);
         await contexto.SaveChangesAsync();
-
-        if (conCambio)
-        {
-            contexto.CambiosOperativos.Add(new CambioOperativo(
-                vuelo.Id,
-                TipoCambioOperativo.CambioPuerta,
-                "Cambio de prueba",
-                "A1",
-                "B2"));
-            await contexto.SaveChangesAsync();
-        }
-
         return vuelo.Id;
     }
 }

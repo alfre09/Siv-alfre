@@ -7,7 +7,7 @@ namespace Siv.Api.Desktop.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin,Operador,Auditor")]
 public class HistorialEstadosController : ControllerBase
 {
     private readonly IHistorialEstadoVueloServicio _historialServicio;

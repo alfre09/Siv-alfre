@@ -61,11 +61,15 @@ aplicacion.UseAuthentication();
 aplicacion.UseAuthorization();
 aplicacion.MapControllers();
 
-using (var alcance = aplicacion.Services.CreateScope())
+if (!aplicacion.Environment.IsEnvironment("Testing"))
 {
+    using var alcance = aplicacion.Services.CreateScope();
     var contexto = alcance.ServiceProvider.GetRequiredService<SivDbContext>();
     await contexto.Database.MigrateAsync();
     await SembradorDeDatos.InicializarAsync(contexto);
 }
 
 aplicacion.Run();
+
+public partial class Program;
+public class DesktopProgramMarker { }

@@ -28,7 +28,6 @@ public static class DependenciasWeb
         servicios.AddHttpClient<ICambioOperativoApiServicio, CambioOperativoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         servicios.AddHttpClient<ISeguimientoApiServicio, SeguimientoApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
         servicios.AddHttpClient<INotificacionApiServicio, NotificacionApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
-        servicios.AddHttpClient<IAuditoriaApiServicio, AuditoriaApiServicio>(ConfigurarCliente).AddHttpMessageHandler<TokenHandler>().AddHttpMessageHandler<ApiResilienciaHandler>();
 
         // HTTP Client extra para el AuthController que no necesita el token de JWT para enviar a login
         servicios.AddHttpClient<IAuthApiServicio, AuthApiServicio>(ConfigurarCliente)

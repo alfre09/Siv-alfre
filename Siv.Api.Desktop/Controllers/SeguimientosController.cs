@@ -36,7 +36,7 @@ public class SeguimientosController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "UsuarioRegistrado")]
     public async Task<ActionResult<SeguimientoDto>> Crear([FromBody] CrearSeguimientoDto dto)
     {
         var seguimientoCreado = await _seguimientoServicio.CrearAsync(dto);

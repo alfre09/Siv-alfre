@@ -43,6 +43,7 @@ public partial class LoginWindow : Window
                 {
                     // Guardar el token en el TokenManager global
                     TokenManager.Token = result.Token;
+                    TokenManager.Rol = result.Rol;
                     
                     // Abrir MainWindow
                     var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
@@ -59,7 +60,7 @@ public partial class LoginWindow : Window
         }
         catch (Exception ex)
         {
-            TxtMensajeError.Text = "Error al conectar con el servidor.";
+            TxtMensajeError.Text = $"Error al conectar con el servidor: {ex.Message}";
             TxtMensajeError.Visibility = Visibility.Visible;
         }
     }

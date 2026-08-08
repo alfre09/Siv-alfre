@@ -6,7 +6,7 @@ namespace Siv.Api.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Microsoft.AspNetCore.Authorization.Authorize(Roles = "UsuarioRegistrado,Admin")]
+[Microsoft.AspNetCore.Authorization.Authorize(Roles = "UsuarioRegistrado")]
 public class SeguimientosController : ControllerBase
 {
     private readonly ISeguimientoServicio _seguimientoServicio;

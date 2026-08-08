@@ -36,6 +36,14 @@ public class AuthController : Controller
         try
         {
             var resultado = await _authApiServicio.LoginAsync(modelo);
+
+            if (!string.Equals(resultado.Rol, "UsuarioRegistrado", StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(string.Empty,
+                    "La Web está destinada a clientes registrados. Los roles operativos deben usar la aplicación Desktop.");
+                return View(modelo);
+            }
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, modelo.Usuario.Trim()),

@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Siv.Domain.Entidades;
+using Siv.Domain.Enums;
 using Siv.Persistence;
 using Xunit;
 
@@ -18,13 +20,13 @@ public class SivApiWebIntegrationTests
 
         var incorrecto = await cliente.PostAsJsonAsync("api/auth/login", new
         {
-            usuario = "admin",
+            usuario = "cliente1",
             password = "incorrecta"
         });
         var correcto = await cliente.PostAsJsonAsync("api/auth/login", new
         {
-            usuario = "admin",
-            password = "Admin123!"
+            usuario = "cliente1",
+            password = "Cliente123!"
         });
 
         Assert.Equal(HttpStatusCode.Unauthorized, incorrecto.StatusCode);
@@ -85,7 +87,7 @@ public class SivApiWebIntegrationTests
         using var cliente = factory.CreateClient();
         var vueloId = await factory.CrearVueloAsync();
         cliente.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(cliente));
+            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(cliente, "cliente1", "Cliente123!"));
 
         var cuerpo = new { usuario = "admin", vueloId };
         var primeraRespuesta = await cliente.PostAsJsonAsync("api/seguimientos", cuerpo);
@@ -96,7 +98,7 @@ public class SivApiWebIntegrationTests
 
         using var alcance = factory.Services.CreateScope();
         var contexto = alcance.ServiceProvider.GetRequiredService<SivDbContext>();
-        Assert.Equal(1, contexto.Seguimientos.Count(s => s.VueloId == vueloId && s.Usuario == "admin"));
+        Assert.Equal(1, contexto.Seguimientos.Count(s => s.VueloId == vueloId && s.Usuario == "cliente1"));
     }
 
     [Fact]
@@ -123,9 +125,28 @@ public class SivApiWebIntegrationTests
     }
 
     [Fact]
-    public async Task Roles_DebePermitirOperacionAlOperadorYAuditoriaAlAuditor()
+    public async Task WebApi_NoDebeExponerOperacionesNiAuditoria()
     {
         using var factory = new SivApiWebFactory();
+        using var cliente = factory.CreateClient();
+        var vueloId = await factory.CrearVueloAsync();
+
+        var cambioOperador = await cliente.PostAsJsonAsync("api/cambiosoperativos/puerta", new
+        {
+            vueloId,
+            nuevaPuerta = "C3",
+            causa = "Cambio autorizado para operador"
+        });
+        var auditoria = await cliente.GetAsync("api/auditoria");
+
+        Assert.Equal(HttpStatusCode.NotFound, cambioOperador.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, auditoria.StatusCode);
+    }
+
+    [Fact]
+    public async Task DesktopApi_DebePermitirOperacionAlOperadorYAuditoriaAlAuditor()
+    {
+        using var factory = new SivApiDesktopFactory($"SivDesktopRoles_{Guid.NewGuid():N}");
         using var cliente = factory.CreateClient();
         var vueloId = await factory.CrearVueloAsync();
 
@@ -137,11 +158,10 @@ public class SivApiWebIntegrationTests
             nuevaPuerta = "C3",
             causa = "Cambio autorizado para operador"
         });
-        var crearComoOperador = await cliente.PostAsJsonAsync("api/vuelos", new { numeroVuelo = "NO" });
 
         cliente.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(cliente, "auditor1", "Auditor123!"));
-        var auditoria = await cliente.GetAsync("api/auditoria");
+        var auditoria = await cliente.GetAsync("api/auditorias");
         var cambioComoAuditor = await cliente.PostAsJsonAsync("api/cambiosoperativos/puerta", new
         {
             vueloId,
@@ -150,7 +170,6 @@ public class SivApiWebIntegrationTests
         });
 
         Assert.Equal(HttpStatusCode.OK, cambioOperador.StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden, crearComoOperador.StatusCode);
         Assert.Equal(HttpStatusCode.OK, auditoria.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, cambioComoAuditor.StatusCode);
     }
@@ -158,24 +177,29 @@ public class SivApiWebIntegrationTests
     [Fact]
     public async Task CambioOperativo_DebeGenerarNotificacionAlSeguidor()
     {
-        using var factory = new SivApiWebFactory();
-        using var cliente = factory.CreateClient();
-        var vueloId = await factory.CrearVueloAsync();
+        var nombreBase = $"SivNotifications_{Guid.NewGuid():N}";
+        using var desktopFactory = new SivApiDesktopFactory(nombreBase);
+        using var webFactory = new SivApiWebFactory(nombreBase);
+        using var cliente = webFactory.CreateClient();
+        var vueloId = await desktopFactory.CrearVueloAsync();
         cliente.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(cliente));
+            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(cliente, "cliente1", "Cliente123!"));
 
         var seguimiento = await cliente.PostAsJsonAsync("api/seguimientos", new
         {
             usuario = "admin",
             vueloId
         });
-        var cambio = await cliente.PostAsJsonAsync("api/cambiosoperativos/puerta", new
+        using var desktopCliente = desktopFactory.CreateClient();
+        desktopCliente.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(desktopCliente, "operador1", "Operador123!"));
+        var cambio = await desktopCliente.PostAsJsonAsync("api/cambiosoperativos/puerta", new
         {
             vueloId,
             nuevaPuerta = "B2",
             causa = "Prueba de notificaciones"
         });
-        var notificaciones = await cliente.GetAsync("api/notificaciones/usuario/admin");
+        var notificaciones = await cliente.GetAsync("api/notificaciones/usuario/cliente1");
         var contenido = await notificaciones.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, seguimiento.StatusCode);
@@ -196,6 +220,52 @@ public class SivApiWebIntegrationTests
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
         Assert.Contains(vuelos.EnumerateArray(), vuelo => vuelo.GetProperty("vueloId").GetInt32() == vueloId);
+    }
+
+    [Fact]
+    public async Task VueloCreadoEnApiDesktop_DebeReservarseDesdeApiWeb()
+    {
+        var nombreBase = $"SivCrossClient_{Guid.NewGuid():N}";
+        using var desktopFactory = new SivApiDesktopFactory(nombreBase);
+        using var webFactory = new SivApiWebFactory(nombreBase);
+        using var alcance = desktopFactory.Services.CreateScope();
+        var contexto = alcance.ServiceProvider.GetRequiredService<SivDbContext>();
+        await contexto.Database.EnsureCreatedAsync();
+
+        var estado = new EstadoVuelo(EstadoVuelo.Programado);
+        var aerolinea = new Aerolinea("IT", "Integration Test Airways");
+        var origen = new Aeropuerto("TST", "Aeropuerto de prueba", "Pruebas", "Bolivia");
+        var destino = new Aeropuerto("TST2", "Aeropuerto destino", "Pruebas", "Bolivia");
+        contexto.EstadosVuelo.Add(estado);
+        contexto.Aerolineas.Add(aerolinea);
+        contexto.Aeropuertos.AddRange(origen, destino);
+        await contexto.SaveChangesAsync();
+
+        using var desktopClient = desktopFactory.CreateClient();
+        desktopClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(desktopClient, "admin", "Admin123!"));
+        var crearVuelo = await desktopClient.PostAsJsonAsync("api/vuelos", new
+        {
+            numeroVuelo = "DT1001",
+            aerolineaId = aerolinea.Id,
+            aeropuertoOrigenId = origen.Id,
+            aeropuertoDestinoId = destino.Id,
+            horarioProgramado = DateTime.UtcNow.AddDays(1),
+            puerta = "A1",
+            nivelVisibilidad = "Publico"
+        });
+        var vuelo = await crearVuelo.Content.ReadFromJsonAsync<JsonElement>();
+
+        using var webClient = webFactory.CreateClient();
+        webClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", await ObtenerTokenAsync(webClient, "cliente1", "Cliente123!"));
+        var reserva = await webClient.PostAsJsonAsync("api/reservas", new
+        {
+            vueloId = vuelo.GetProperty("vueloId").GetInt32()
+        });
+
+        Assert.Equal(HttpStatusCode.Created, crearVuelo.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, reserva.StatusCode);
     }
 
     [Fact]

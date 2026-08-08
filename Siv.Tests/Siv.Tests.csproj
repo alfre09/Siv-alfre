@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Siv.Application\Siv.Application.csproj" />
     <ProjectReference Include="..\Siv.Domain\Siv.Domain.csproj" />
     <ProjectReference Include="..\Siv.Api.Web\Siv.Api.Web.csproj" />
+    <ProjectReference Include="..\Siv.Api.Desktop\Siv.Api.Desktop.csproj" />
   </ItemGroup>
 
 </Project>

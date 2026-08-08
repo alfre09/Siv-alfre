@@ -11,6 +11,7 @@
         Foreground="{StaticResource BrushTextoClaro}"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <DataTemplate DataType="{x:Type viewModels:VuelosViewModel}">
             <local:VuelosView />
         </DataTemplate>
@@ -32,6 +33,9 @@
         <DataTemplate DataType="{x:Type viewModels:AuditoriasViewModel}">
             <local:AuditoriasView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:HistorialEstadosViewModel}">
+            <local:HistorialEstadosView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -45,13 +49,13 @@
             <StackPanel>
                 <TextBlock Text="SIV Desktop" FontSize="20" FontWeight="Bold" Margin="20,30,20,40" Foreground="{StaticResource BrushTextoClaro}" />
                 
-                <Button Content="✈️ Vuelos" Command="{Binding NavigateToVuelosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="🏢 Aerolíneas" Command="{Binding NavigateToAerolineasCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="📍 Aeropuertos" Command="{Binding NavigateToAeropuertosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="🔄 Cambios operativos" Command="{Binding NavigateToCambiosOperativosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="👁️ Seguimientos" Command="{Binding NavigateToSeguimientosCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="🔔 Notificaciones" Command="{Binding NavigateToNotificacionesCommand}" Style="{StaticResource BotonMenuNavegacion}" />
-                <Button Content="📜 Auditoría" Command="{Binding NavigateToAuditoriasCommand}" Style="{StaticResource BotonMenuNavegacion}" />
+                <Button Content="✈️ Vuelos" Command="{Binding NavigateToVuelosCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarVuelos, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="🏢 Aerolíneas" Command="{Binding NavigateToAerolineasCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding EsAdmin, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="📍 Aeropuertos" Command="{Binding NavigateToAeropuertosCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding EsAdmin, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="🔄 Cambios operativos" Command="{Binding NavigateToCambiosOperativosCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeGestionarCambios, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="📜 Historial de estados" Command="{Binding NavigateToHistorialEstadosCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarHistorial, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="🔔 Notificaciones" Command="{Binding NavigateToNotificacionesCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarNotificaciones, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="📜 Auditoría" Command="{Binding NavigateToAuditoriasCommand}" Style="{StaticResource BotonMenuNavegacion}" Visibility="{Binding PuedeConsultarAuditoria, Converter={StaticResource BoolToVisibilityConverter}}" />
             </StackPanel>
         </Border>
 

@@ -91,3 +91,4 @@ if (!aplicacion.Environment.IsEnvironment("Testing"))
 aplicacion.Run();
 
 public partial class Program;
+public class WebProgramMarker { }

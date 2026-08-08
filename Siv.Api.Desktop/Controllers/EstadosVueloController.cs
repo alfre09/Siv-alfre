@@ -18,6 +18,7 @@ public class EstadosVueloController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Operador,Auditor")]
     public async Task<ActionResult<List<EstadoVueloDto>>> ObtenerTodos()
     {
         var estados = await _estadoVueloServicio.ObtenerTodosAsync();

@@ -71,7 +71,7 @@ public class VuelosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "UsuarioRegistrado,Admin")]
+    [Authorize(Roles = "UsuarioRegistrado")]
     public async Task<IActionResult> Seguir(int vueloId)
     {
         var usuarioNormalizado = User.Identity?.Name?.Trim();

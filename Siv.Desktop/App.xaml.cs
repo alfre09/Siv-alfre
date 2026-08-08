@@ -69,6 +69,7 @@ public partial class App : Application
         services.AddTransient<SeguimientosViewModel>();
         services.AddTransient<NotificacionesViewModel>();
         services.AddTransient<AuditoriasViewModel>();
+        services.AddTransient<HistorialEstadosViewModel>();
         
         // Singleton para MainViewModel porque maneja la navegación principal
         services.AddSingleton<MainViewModel>();

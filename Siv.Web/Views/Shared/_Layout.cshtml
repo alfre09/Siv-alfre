@@ -26,7 +26,7 @@
                             Buscar vuelos
                         </a>
                     </li>
-                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("UsuarioRegistrado") || User.IsInRole("Admin")))
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
                     {
                         <li>
                             <a asp-controller="Reservas" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reservas" ? "activo" : "")">
@@ -47,15 +47,18 @@
                             Vuelos
                         </a>
                     </li>
-                    <li>
-                        <a asp-controller="Notificaciones" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Notificaciones" ? "activo" : "")">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                            Notificaciones
-                        </a>
-                    </li>
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
+                    {
+                        <li>
+                            <a asp-controller="Notificaciones" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Notificaciones" ? "activo" : "")">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                Notificaciones
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <div class="siv-nav__auth" style="display: flex; align-items: center; gap: 1rem;">
                     @if (User.Identity?.IsAuthenticated == true)
@@ -88,7 +91,7 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
-    @if (User.Identity?.IsAuthenticated == true)
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
     {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
         <script>

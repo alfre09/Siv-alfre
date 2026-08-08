@@ -47,6 +47,10 @@ public class AuthController : ControllerBase
             }
         }
 
+        if (!string.Equals(rol, "UsuarioRegistrado", StringComparison.OrdinalIgnoreCase))
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new { mensaje = "La API Web está destinada únicamente a clientes registrados." });
+
         return CrearRespuestaToken(nombreToken, rol);
     }
 

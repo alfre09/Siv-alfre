@@ -6,7 +6,7 @@ namespace Siv.Api.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Microsoft.AspNetCore.Authorization.Authorize(Roles = "UsuarioRegistrado,Admin,Auditor")]
+[Microsoft.AspNetCore.Authorization.Authorize(Roles = "UsuarioRegistrado")]
 public class NotificacionesController : ControllerBase
 {
     private readonly INotificacionServicio _notificacionServicio;
@@ -16,13 +16,6 @@ public class NotificacionesController : ControllerBase
         _notificacionServicio = notificacionServicio;
     }
 
-    [HttpGet]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Auditor")]
-    public async Task<ActionResult<List<NotificacionDto>>> ObtenerTodas()
-    {
-        return Ok(await _notificacionServicio.ObtenerTodosAsync());
-    }
-
     [HttpGet("usuario/{usuario}")]
     public async Task<ActionResult<List<NotificacionDto>>> ObtenerPorUsuario(string usuario)
     {
@@ -30,8 +23,7 @@ public class NotificacionesController : ControllerBase
         if (string.IsNullOrWhiteSpace(usuarioAutenticado))
             return Unauthorized();
 
-        if (!User.IsInRole("Admin") && !User.IsInRole("Auditor") &&
-            !usuarioAutenticado.Equals(usuario, StringComparison.OrdinalIgnoreCase))
+        if (!usuarioAutenticado.Equals(usuario, StringComparison.OrdinalIgnoreCase))
             return Forbid();
 
         var notificaciones = await _notificacionServicio.ObtenerPorUsuarioAsync(usuario);
@@ -39,7 +31,6 @@ public class NotificacionesController : ControllerBase
     }
 
     [HttpPatch("{id:int}/marcar-leida")]
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "UsuarioRegistrado,Admin")]
     public async Task<IActionResult> MarcarComoLeida(int id)
     {
         var usuario = User.Identity?.Name;

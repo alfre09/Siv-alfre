@@ -7,7 +7,7 @@ namespace Siv.Api.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "UsuarioRegistrado,Admin")]
+[Authorize(Roles = "UsuarioRegistrado")]
 public class ReservasController : ControllerBase
 {
     private readonly IReservaServicio _reservaServicio;

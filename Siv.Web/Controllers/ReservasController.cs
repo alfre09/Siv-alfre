@@ -5,7 +5,7 @@ using Siv.Web.Modelos;
 
 namespace Siv.Web.Controllers;
 
-[Authorize(Roles = "UsuarioRegistrado,Admin")]
+[Authorize(Roles = "UsuarioRegistrado")]
 public class ReservasController : Controller
 {
     private readonly IReservaApiServicio _reservaApiServicio;

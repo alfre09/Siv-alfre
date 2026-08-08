@@ -18,6 +18,7 @@ public class AeropuertosController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Operador,Auditor")]
     public async Task<ActionResult<List<AeropuertoDto>>> ObtenerTodos()
     {
         var aeropuertos = await _aeropuertoServicio.ObtenerTodosAsync();
@@ -25,6 +26,7 @@ public class AeropuertosController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "Admin,Operador,Auditor")]
     public async Task<ActionResult<AeropuertoDto>> ObtenerPorId(int id)
     {
         var aeropuerto = await _aeropuertoServicio.ObtenerPorIdAsync(id);
@@ -36,6 +38,7 @@ public class AeropuertosController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<AeropuertoDto>> Crear([FromBody] CrearAeropuertoDto dto)
     {
         var aeropuertoCreado = await _aeropuertoServicio.CrearAsync(dto);
@@ -43,6 +46,7 @@ public class AeropuertosController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarAeropuertoDto dto)
     {
         if (id != dto.AeropuertoId)
@@ -53,6 +57,7 @@ public class AeropuertosController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Eliminar(int id)
     {
         await _aeropuertoServicio.EliminarAsync(id);

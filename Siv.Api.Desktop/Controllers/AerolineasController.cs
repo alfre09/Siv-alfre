@@ -18,6 +18,7 @@ public class AerolineasController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Operador,Auditor")]
     [ProducesResponseType(typeof(List<AerolineaDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<AerolineaDto>>> ObtenerTodos()
     {
@@ -26,6 +27,7 @@ public class AerolineasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "Admin,Operador,Auditor")]
     [ProducesResponseType(typeof(AerolineaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AerolineaDto>> ObtenerPorId(int id)
@@ -39,6 +41,7 @@ public class AerolineasController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(AerolineaDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AerolineaDto>> Crear([FromBody] CrearAerolineaDto dto)
@@ -48,6 +51,7 @@ public class AerolineasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -61,6 +65,7 @@ public class AerolineasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Eliminar(int id)

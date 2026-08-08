@@ -92,7 +92,7 @@
                 <p style="color: var(--siv-texto-suave); font-size: 0.85rem; margin-top: -0.5rem;">
                     Recibe notificaciones ante cualquier cambio operativo de este vuelo.
                 </p>
-                @if (User.Identity?.IsAuthenticated == true)
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
                 {
                 <form asp-action="Seguir" method="post">
                     @Html.AntiForgeryToken()
@@ -111,7 +111,7 @@
             </div>
         </div>
 
-        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("UsuarioRegistrado") || User.IsInRole("Admin")))
+        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("UsuarioRegistrado"))
         {
             <div class="siv-tarjeta">
                 <div class="siv-tarjeta__cuerpo">

@@ -13,7 +13,7 @@ public class NotificacionesController : Controller
         _notificacionApiServicio = notificacionApiServicio;
     }
 
-    [Authorize(Roles = "UsuarioRegistrado,Admin")]
+    [Authorize(Roles = "UsuarioRegistrado")]
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -34,7 +34,7 @@ public class NotificacionesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "UsuarioRegistrado,Admin")]
+    [Authorize(Roles = "UsuarioRegistrado")]
     public async Task<IActionResult> MarcarLeida(int id)
     {
         try
