@@ -1,0 +1,163 @@
+@model List<VueloViewModel>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tablero de Vuelos - FIDS</title>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap');
+
+        body {
+            background-color: #000;
+            color: #FFD700;
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .fids-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .fids-header h1 {
+            color: #fff;
+            margin: 0;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .clock {
+            font-size: 3rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            color: #fff;
+            text-align: left;
+            font-size: 1.2rem;
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+        }
+
+        td {
+            padding: 12px 0;
+            font-size: 1.4rem;
+            font-weight: 500;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .col-time { width: 12%; }
+        .col-flight { width: 15%; color: #fff; }
+        .col-gate { width: 10%; }
+        .col-dest { width: 30%; }
+        .col-status { width: 33%; text-transform: uppercase; }
+
+        .status-programado { color: #FFD700; }
+        .status-embarcando { color: #00FF00; animation: blink 1.5s infinite; }
+        .status-en-vuelo { color: #fff; }
+        .status-aterrizado { color: #888; }
+        .status-cancelado { color: #FF0000; }
+
+        @@keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fids-header">
+        <h1>Departures / Salidas</h1>
+        <div class="clock" id="clock">00:00</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-time">Time</th>
+                <th class="col-flight">Flight</th>
+                <th class="col-gate">Gate</th>
+                <th class="col-dest">Destination</th>
+                <th class="col-status">Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vuelo in Model.OrderBy(v => v.HorarioProgramado))
+            {
+                var statusClass = vuelo.EstadoVueloNombre.ToLower() switch
+                {
+                    "programado" => "status-programado",
+                    "embarcando" => "status-embarcando",
+                    "en vuelo" => "status-en-vuelo",
+                    "aterrizado" => "status-aterrizado",
+                    "cancelado" => "status-cancelado",
+                    _ => "status-programado"
+                };
+
+                var statusText = vuelo.EstadoVueloNombre.ToLower() switch
+                {
+                    "programado" => "On Time",
+                    "embarcando" => "Go to gate",
+                    "en vuelo" => "Departed",
+                    "aterrizado" => "Arrived",
+                    "cancelado" => "Cancelled",
+                    _ => vuelo.EstadoVueloNombre
+                };
+
+                <tr>
+                    <td class="col-time">@vuelo.HorarioProgramado.ToString("HH:mm")</td>
+                    <td class="col-flight">@vuelo.NumeroVuelo</td>
+                    <td class="col-gate">@(string.IsNullOrWhiteSpace(vuelo.Puerta) ? "-" : vuelo.Puerta)</td>
+                    <td class="col-dest">@vuelo.AeropuertoDestinoNombre</td>
+                    <td class="col-status @statusClass">@statusText</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
+    <script>
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // SignalR Auto-Reload
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5200/notificacionesHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("RecibirNotificacion", function (mensaje) {
+            // Reload page smoothly to fetch new flight data
+            setTimeout(() => { window.location.reload(); }, 500);
+        });
+
+        connection.start().catch(err => console.error(err));
+    </script>
+</body>
+</html>
