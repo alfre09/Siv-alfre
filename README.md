@@ -23,15 +23,57 @@ El sistema está dividido en las siguientes capas (Clean Architecture):
 
 ---
 
-## 🔐 Roles y Credenciales (RBAC)
+## 🔐 Clientes, pantalla pública y roles (RBAC)
 
-El sistema soporta 3 roles con accesos y permisos distintos. Al ejecutar el proyecto por primera vez, la base de datos (LocalDB) se siembra automáticamente con estos usuarios de prueba:
+El SIV tiene dos tipos de acceso: un cliente Web público para pasajeros y clientes, y una aplicación Desktop protegida para la operación interna del aeropuerto.
 
-| Rol | Usuario | Contraseña | Descripción |
+### Cliente Web sin iniciar sesión
+
+La pantalla Web pública no requiere autenticación. Al entrar a `http://localhost:5100` el visitante puede:
+
+- Ver la página inicial del sistema.
+- Consultar el tablero de vuelos disponibles.
+- Filtrar vuelos por origen, destino y fecha.
+- Consultar el detalle de un vuelo público, incluyendo su estado y programación vigente.
+- Acceder a las pantallas de **Ingresar** y **Registrarse**.
+
+Las acciones personales no están disponibles para un visitante. Para seguir un vuelo, recibir notificaciones o gestionar reservas debe registrarse e iniciar sesión como cliente.
+
+### Cliente registrado en Web
+
+El registro Web crea un usuario con el rol `UsuarioRegistrado`. Después de iniciar sesión, el cliente puede:
+
+- Seguir y dejar de seguir vuelos.
+- Recibir y consultar notificaciones de cambios operativos.
+- Marcar sus notificaciones como leídas.
+- Gestionar sus reservas.
+
+El cliente registrado no puede modificar vuelos, administrar catálogos ni consultar la auditoría administrativa.
+
+### Usuarios internos de prueba
+
+Al ejecutar el proyecto por primera vez, la base de datos (LocalDB) se siembra automáticamente con estos usuarios internos:
+
+| Perfil | Usuario | Contraseña | Acceso |
 | :--- | :--- | :--- | :--- |
 | **Administrador** | `admin` | `Admin123!` | Acceso total al sistema, configuración de vuelos, usuarios y visibilidad. |
-| **Operador** | `operador1` | `Operador123!` | Puede realizar **Cambios Operativos** (ej. cambiar puerta de embarque, actualizar estado del vuelo). |
-| **Auditor** | `auditor1` | `Auditor123!` | Acceso de solo lectura al módulo de **Auditorías** para revisar el historial de cambios. |
+| **Operador** | `operador1` | `Operador123!` | Cambios operativos: puerta, horario, estado y cancelación según las reglas del dominio. |
+| **Auditor** | `auditor1` | `Auditor123!` | Consulta de auditorías, historial de estados y trazabilidad sin modificar la operación. |
+
+Los usuarios internos ingresan desde la aplicación Desktop. El cliente Web se registra desde la opción **Registrarse** y no comparte las credenciales de operación interna.
+
+### Flujo de acceso
+
+```text
+Visitante
+   ├─> Pantalla inicial y vuelos disponibles
+   ├─> Detalle de vuelo público
+   └─> Registrarse / Ingresar
+          └─> UsuarioRegistrado: seguimiento, notificaciones y reservas
+
+Administrador / Operador / Auditor
+   └─> Login de Siv.Desktop: operación, catálogos e información administrativa
+```
 
 ---
 
