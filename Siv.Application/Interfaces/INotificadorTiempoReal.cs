@@ -2,6 +2,6 @@ namespace Siv.Application.Interfaces;
 
 public interface INotificadorTiempoReal
 {
-    Task EnviarNotificacionAsync(string usuario, string mensaje);
-    Task EnviarNotificacionGeneralAsync(string mensaje);
+    Task<bool> EnviarNotificacionAsync(string usuario, string mensaje);
+    Task<bool> EnviarNotificacionGeneralAsync(string mensaje);
 }

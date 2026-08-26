@@ -13,15 +13,17 @@ public class NotificadorSignalR : INotificadorTiempoReal
         _hubContext = hubContext;
     }
 
-    public async Task EnviarNotificacionAsync(string usuario, string mensaje)
+    public async Task<bool> EnviarNotificacionAsync(string usuario, string mensaje)
     {
         // En SignalR podemos enviar a un usuario específico si tenemos configurado un CustomUserIdProvider
         // Por simplicidad, enviaremos a un grupo con el nombre del usuario
         await _hubContext.Clients.Group(usuario).SendAsync("RecibirNotificacion", mensaje);
+        return true;
     }
 
-    public async Task EnviarNotificacionGeneralAsync(string mensaje)
+    public async Task<bool> EnviarNotificacionGeneralAsync(string mensaje)
     {
         await _hubContext.Clients.All.SendAsync("RecibirNotificacion", mensaje);
+        return true;
     }
 }

@@ -98,10 +98,37 @@ public class NotificacionServicio : INotificacionServicio
         await _unidadDeTrabajo.Notificaciones.AgregarRangoAsync(notificaciones);
         await _unidadDeTrabajo.GuardarCambiosAsync();
 
-        // Enviar notificaciones en tiempo real a cada usuario interesado
-        foreach (var usuario in interesados.Distinct(StringComparer.OrdinalIgnoreCase))
+        // Enviar y auditar el resultado individual de cada entrega en tiempo real.
+        foreach (var notificacion in notificaciones)
         {
-            await _notificadorTiempoReal.EnviarNotificacionAsync(usuario, mensaje);
+            var enviado = false;
+            string resultado;
+
+            try
+            {
+                enviado = await _notificadorTiempoReal.EnviarNotificacionAsync(
+                    notificacion.Usuario,
+                    notificacion.Mensaje);
+                resultado = enviado ? "Enviado" : "Fallido";
+            }
+            catch (Exception ex)
+            {
+                resultado = "Fallido";
+                _logger.LogError(
+                    ex,
+                    "No se pudo entregar la notificación {NotificacionId} al usuario {Usuario}.",
+                    notificacion.Id,
+                    notificacion.Usuario);
+            }
+
+            await _auditoriaServicio.RegistrarAsync(
+                enviado ? "Enviar" : "ErrorEnvio",
+                "Notificaciones",
+                $"Entrega de la notificación {notificacion.Id} al usuario {notificacion.Usuario} " +
+                $"para el cambio operativo {cambioOperativoId}: {resultado}.",
+                registroId: notificacion.Id,
+                valorAnterior: "Pendiente",
+                valorNuevo: resultado);
         }
 
         await _auditoriaServicio.RegistrarAsync(

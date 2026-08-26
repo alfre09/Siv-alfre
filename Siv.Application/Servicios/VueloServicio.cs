@@ -35,7 +35,7 @@ public class VueloServicio : IVueloServicio
 
         // Filtrar por nivel de visibilidad según el rol del usuario
         vuelos = vuelos
-            .Where(v => PoliticaVisibilidadVuelo.PuedeConsultar(v.NivelVisibilidad, rolUsuario))
+            .Where(v => PoliticaVisibilidadVuelo.PuedeConsultar(v.NivelVisibilidad, rolUsuario, v.EstadoVuelo))
             .ToList();
 
         return vuelos.Select(v => v.ADto()).ToList();
@@ -64,7 +64,7 @@ public class VueloServicio : IVueloServicio
         _logger.LogInformation("Obteniendo vuelo con id {Id}", id);
         var vuelo = await _unidadDeTrabajo.Vuelos.ObtenerConDetalleAsync(id);
 
-        if (vuelo is null || !PoliticaVisibilidadVuelo.PuedeConsultar(vuelo.NivelVisibilidad, rolUsuario))
+        if (vuelo is null || !PoliticaVisibilidadVuelo.PuedeConsultar(vuelo.NivelVisibilidad, rolUsuario, vuelo.EstadoVuelo))
             return null;
 
         var rolAuditoria = string.IsNullOrWhiteSpace(rolUsuario) ? "Usuario anónimo" : $"Rol: {rolUsuario}";

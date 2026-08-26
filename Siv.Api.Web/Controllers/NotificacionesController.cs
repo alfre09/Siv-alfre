@@ -48,8 +48,8 @@ public class NotificacionesController : ControllerBase
         // En un caso real usaríamos una clave compartida o un token para verificar que viene de la API Desktop
         // Aquí simplemente usamos el notificador para enviar la señal a los clientes de SignalR en la Web
         var notificador = HttpContext.RequestServices.GetRequiredService<INotificadorTiempoReal>();
-        await notificador.EnviarNotificacionAsync(request.Usuario, request.Mensaje);
-        return Ok();
+        var enviado = await notificador.EnviarNotificacionAsync(request.Usuario, request.Mensaje);
+        return enviado ? Ok() : StatusCode(StatusCodes.Status502BadGateway);
     }
 }
 

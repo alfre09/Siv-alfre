@@ -55,6 +55,14 @@ public sealed class SivApiWebFactory : WebApplicationFactory<WebProgramMarker>
         contexto.Aeropuertos.AddRange(origen, destino);
         await contexto.SaveChangesAsync();
 
+        // Las pruebas de cambios operativos validan que la nueva puerta
+        // exista. El fixture debe representar también ese catálogo.
+        contexto.Puertas.AddRange(
+            new Puerta("A1", destino.Id),
+            new Puerta("B2", destino.Id),
+            new Puerta("C3", destino.Id));
+        await contexto.SaveChangesAsync();
+
         var vuelo = new Vuelo(
             $"IT{Random.Shared.Next(10000, 99999)}",
             aerolinea.Id,

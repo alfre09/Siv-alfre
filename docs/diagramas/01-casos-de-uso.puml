@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor Visitante
+actor "Usuario registrado" as Usuario
+actor Operador
+actor Administrador
+actor Auditor
+
+rectangle "SIV - API Web" {
+  usecase "Consultar vuelos" as UC1
+  usecase "Consultar detalle e historial" as UC2
+  usecase "Seguir vuelo" as UC3
+  usecase "Consultar notificaciones" as UC4
+}
+
+rectangle "SIV - API Desktop" {
+  usecase "Registrar/actualizar programación" as UC5
+  usecase "Registrar cambio operativo" as UC6
+  usecase "Actualizar estado" as UC7
+  usecase "Cancelar vuelo" as UC8
+  usecase "Consultar auditoría" as UC9
+}
+
+Visitante --> UC1
+Usuario --> UC1
+Usuario --> UC2
+Usuario --> UC3
+Usuario --> UC4
+Administrador --> UC5
+Administrador --> UC6
+Administrador --> UC7
+Administrador --> UC8
+Operador --> UC6
+Operador --> UC7
+Operador --> UC8
+Auditor --> UC2
+Auditor --> UC9
+@enduml

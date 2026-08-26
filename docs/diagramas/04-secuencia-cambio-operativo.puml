@@ -1,0 +1,19 @@
+@startuml
+actor Operador
+participant "Siv.Desktop" as Desktop
+participant "Siv.Api.Desktop" as ApiD
+participant "Siv.Application" as App
+database "Persistence" as DB
+participant "Siv.Api.Web" as ApiW
+participant "Siv.Web" as Web
+
+Operador -> Desktop: Solicitar cambio
+Desktop -> ApiD: POST /api/cambiosoperativos
+ApiD -> App: Ejecutar caso de uso
+App -> App: Validar permisos y dominio
+App -> DB: Guardar vuelo, cambio y auditoría
+App -> DB: Crear notificaciones
+ApiD -> ApiW: Difundir cambio
+ApiW -> Web: Publicar evento SignalR
+ApiD --> Desktop: DTO del cambio
+@enduml

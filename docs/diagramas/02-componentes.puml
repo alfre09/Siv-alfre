@@ -1,0 +1,24 @@
+@startuml
+skinparam componentStyle rectangle
+
+component "Siv.Web" as Web
+component "Siv.Desktop" as Desktop
+component "Siv.Api.Web" as ApiWeb
+component "Siv.Api.Desktop" as ApiDesktop
+component "Siv.Application" as Application
+component "Siv.Domain" as Domain
+component "Siv.Persistence" as Persistence
+database "Base de datos" as DB
+component "SignalR Hub" as SignalR
+
+Web --> ApiWeb : HTTPS / DTOs
+Desktop --> ApiDesktop : HTTPS / DTOs
+ApiWeb --> Application
+ApiDesktop --> Application
+Application --> Domain
+Application --> Persistence
+Persistence --> DB
+ApiDesktop --> ApiWeb : difusión de cambios
+ApiWeb --> SignalR
+SignalR --> Web : eventos en tiempo real
+@enduml

@@ -43,7 +43,7 @@ public class CambioOperativoServicio : ICambioOperativoServicio
         _logger.LogInformation("Obteniendo cambios operativos para el vuelo {VueloId}", vueloId);
         var vuelo = await _unidadDeTrabajo.Vuelos.ObtenerConDetalleAsync(vueloId);
 
-        if (vuelo is null || !PoliticaVisibilidadVuelo.PuedeConsultar(vuelo.NivelVisibilidad, rolUsuario))
+        if (vuelo is null || !PoliticaVisibilidadVuelo.PuedeConsultar(vuelo.NivelVisibilidad, rolUsuario, vuelo.EstadoVuelo))
             return new List<CambioOperativoDto>();
 
         var cambios = await _unidadDeTrabajo.CambiosOperativos.ObtenerPorVueloAsync(vueloId);

@@ -1,0 +1,55 @@
+@startuml
+class Vuelo {
+  +Id: int
+  +NumeroVuelo: string
+  +HorarioProgramado: DateTime
+  +Puerta: string
+  +NivelVisibilidad
+  +AplicarCambioDeHorario()
+  +AplicarCambioDePuerta()
+  +AplicarCambioDeEstado()
+}
+
+class EstadoVuelo {
+  +Id: int
+  +Nombre: string
+  +EsFinal(): bool
+}
+
+class CambioOperativo {
+  +Id: int
+  +TipoCambio
+  +Causa: string
+  +ValorAnterior: string
+  +ValorNuevo: string
+}
+
+class Seguimiento {
+  +Id: int
+  +VueloId: int
+  +Usuario: string
+}
+
+class Notificacion {
+  +Id: int
+  +VueloId: int
+  +CambioOperativoId: int
+  +Usuario: string
+  +Leida: bool
+}
+
+class Auditoria {
+  +Id: int
+  +Accion: string
+  +Tabla: string
+  +Descripcion: string
+  +ValorAnterior: string
+  +ValorNuevo: string
+}
+
+Vuelo --> EstadoVuelo
+Vuelo "1" o-- "0..*" CambioOperativo
+Vuelo "1" o-- "0..*" Seguimiento
+CambioOperativo "1" --> "0..*" Notificacion
+CambioOperativo --> Auditoria
+@enduml

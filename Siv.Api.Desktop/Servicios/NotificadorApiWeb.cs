@@ -15,29 +15,48 @@ public class NotificadorApiWeb : INotificadorTiempoReal
         _logger = logger;
     }
 
-    public async Task EnviarNotificacionAsync(string usuario, string mensaje)
+    public async Task<bool> EnviarNotificacionAsync(string usuario, string mensaje)
     {
         try
         {
             var payload = new { Usuario = usuario, Mensaje = mensaje };
-            await _httpClient.PostAsJsonAsync("api/notificaciones/difundir", payload);
+            using var respuesta = await _httpClient.PostAsJsonAsync("api/notificaciones/difundir", payload);
+            if (!respuesta.IsSuccessStatusCode)
+            {
+                _logger.LogWarning(
+                    "La API Web rechazó la notificación para {Usuario}. Código HTTP: {StatusCode}",
+                    usuario,
+                    respuesta.StatusCode);
+                return false;
+            }
+
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al enviar notificación a la API Web.");
+            return false;
         }
     }
 
-    public async Task EnviarNotificacionGeneralAsync(string mensaje)
+    public async Task<bool> EnviarNotificacionGeneralAsync(string mensaje)
     {
         try
         {
             var payload = new { Usuario = string.Empty, Mensaje = mensaje };
-            await _httpClient.PostAsJsonAsync("api/notificaciones/difundir", payload);
+            using var respuesta = await _httpClient.PostAsJsonAsync("api/notificaciones/difundir", payload);
+            if (!respuesta.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("La API Web rechazó la notificación general. Código HTTP: {StatusCode}", respuesta.StatusCode);
+                return false;
+            }
+
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al enviar notificación general a la API Web.");
+            return false;
         }
     }
 }

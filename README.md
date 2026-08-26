@@ -9,6 +9,8 @@ El sistema está dividido en múltiples aplicaciones y capas para garantizar sep
 
 ## 🏗 Arquitectura y Estructura del Proyecto
 
+La documentación formal de requisitos, arquitectura, diagramas UML, matriz de cumplimiento y evidencias se encuentra en [`docs/`](docs/README.md).
+
 El sistema está dividido en las siguientes capas (Clean Architecture):
 
 - **Siv.Domain:** Entidades centrales del negocio (Vuelo, Puerta, Auditoría, Usuario, etc.) y las interfaces de los repositorios.
