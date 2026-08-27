@@ -1,6 +1,6 @@
 # Diagramas de arquitectura del SIV
 
-Documento basado en la solución actual de Siv.sln. Los diagramas están escritos en Mermaid para poder renderizarlos en GitHub, Markdown Preview, Obsidian o convertirlos posteriormente a PNG/PDF.
+Documento basado en la solución actual de Siv.sln. Los diagramas están escritos en Mermaid para poder renderizarlos en GitHub
 
 ## 1. Diagrama general de arquitectura
 
@@ -541,9 +541,3 @@ flowchart LR
 
 Las APIs funcionan como puntos de composición: consumen los servicios de aplicación y registran la persistencia concreta. `Siv.Web` no llama directamente a repositorios y `Siv.Desktop` no accede directamente a la base de datos; ambos consumen sus APIs mediante HTTP.
 
-## 10. Recomendación para entregar los diagramas
-
-1. Abrir este archivo en GitHub o en un editor con soporte Mermaid.
-2. Exportar cada bloque como SVG o PNG.
-3. Si el profesor solicita UML tradicional, importar las relaciones principales en draw.io.
-4. Mantener la separación: puestos administrativos y operativos en Desktop; clientes y reservas en Web.
