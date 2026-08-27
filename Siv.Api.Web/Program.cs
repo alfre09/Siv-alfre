@@ -14,6 +14,7 @@ using Siv.Persistence.Configuracion;
 using Siv.Persistence.Semilla;
 
 var constructor = WebApplication.CreateBuilder(args);
+constructor.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 
 constructor.Services.AddControllers(options => options.Filters.Add<Siv.Api.Web.Filtros.AuditoriaLecturaFilter>());

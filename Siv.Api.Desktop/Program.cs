@@ -11,6 +11,7 @@ using Siv.Persistence.Configuracion;
 using Siv.Persistence.Semilla;
 
 var constructor = WebApplication.CreateBuilder(args);
+constructor.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 constructor.Services.AddControllers();
 
