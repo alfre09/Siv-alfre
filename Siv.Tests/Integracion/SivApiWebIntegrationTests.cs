@@ -141,8 +141,8 @@ public class SivApiWebIntegrationTests
         });
         var auditoria = await cliente.GetAsync("api/auditoria");
 
-        Assert.Equal(HttpStatusCode.NotFound, cambioOperador.StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, auditoria.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, cambioOperador.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, auditoria.StatusCode);
     }
 
     [Fact]

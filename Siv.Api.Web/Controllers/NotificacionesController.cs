@@ -42,11 +42,9 @@ public class NotificacionesController : ControllerBase
     }
 
     [HttpPost("difundir")]
-    [Microsoft.AspNetCore.Authorization.AllowAnonymous] // Para permitir que Desktop envíe la notificación
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Difundir([FromBody] DifundirRequest request)
     {
-        // En un caso real usaríamos una clave compartida o un token para verificar que viene de la API Desktop
-        // Aquí simplemente usamos el notificador para enviar la señal a los clientes de SignalR en la Web
         var notificador = HttpContext.RequestServices.GetRequiredService<INotificadorTiempoReal>();
         var enviado = await notificador.EnviarNotificacionAsync(request.Usuario, request.Mensaje);
         return enviado ? Ok() : StatusCode(StatusCodes.Status502BadGateway);

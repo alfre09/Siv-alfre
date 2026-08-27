@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,13 @@ constructor.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 constructor.Configuration["Jwt:Key"]!))
         };
     });
+
+constructor.Services.AddAuthorization(opciones =>
+{
+    opciones.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 constructor.Services.AddEndpointsApiExplorer();
 constructor.Services.AddSwaggerGen(opciones =>

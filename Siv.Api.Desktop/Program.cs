@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,13 @@ constructor.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+constructor.Services.AddAuthorization(opciones =>
+{
+    opciones.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 constructor.Services.AddEndpointsApiExplorer();
 constructor.Services.AddSwaggerGen(opciones =>
 {
@@ -41,6 +49,7 @@ constructor.Services.AddSwaggerGen(opciones =>
 });
 
 constructor.Services.AddSIVDependencies(constructor.Configuration);
+constructor.Services.AddHttpContextAccessor();
 constructor.Services.AddHttpClient<Siv.Application.Interfaces.INotificadorTiempoReal, Siv.Api.Desktop.Servicios.NotificadorApiWeb>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5200");

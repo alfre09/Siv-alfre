@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Siv.Application.Dtos;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var usuarioStr = request.Usuario.Trim().ToLowerInvariant();
@@ -55,6 +57,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("registro")]
+    [AllowAnonymous]
     public async Task<IActionResult> Registrar([FromBody] RegistrarUsuarioDto dto)
     {
         var nombre = dto.NombreUsuario?.Trim().ToLowerInvariant() ?? string.Empty;
@@ -99,4 +102,3 @@ public class LoginRequest
     public string Usuario { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
-
