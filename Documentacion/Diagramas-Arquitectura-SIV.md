@@ -427,7 +427,121 @@ El error de SMTP se registra y no deshace el cambio operativo ni la notificació
 | Desktop | GET /api/auditorias | Consultar auditoría | Admin / Auditor |
 | Desktop | GET /api/puertas | Cargar puertas disponibles | Admin / Operador |
 
-## 8. Recomendación para entregar los diagramas
+## 8. Diagrama de casos de uso
+
+El diagrama distingue las consultas públicas del visitante, las acciones personales del cliente registrado y las operaciones internas que se ejecutan desde Desktop.
+
+~~~mermaid
+flowchart LR
+    Visitante((Visitante))
+    Cliente((Usuario registrado))
+    Operador((Operador))
+    Admin((Administrador))
+    Auditor((Auditor))
+
+    subgraph WebUC[Casos de uso Web]
+        Consultar([Consultar vuelos públicos])
+        Buscar([Buscar por origen, destino y fecha])
+        Detalle([Consultar detalle e historial])
+        Registrarse([Registrarse / iniciar sesión])
+        Reservar([Crear y consultar reservas])
+        CancelarReserva([Cancelar reserva propia])
+        Seguir([Seguir o dejar de seguir vuelo])
+        Notificaciones([Consultar notificaciones])
+    end
+
+    subgraph DesktopUC[Casos de uso Desktop]
+        CrearVuelo([Crear vuelo])
+        Actualizar([Actualizar programación])
+        Cambio([Registrar cambio operativo])
+        Estado([Cambiar estado del vuelo])
+        Historial([Consultar historial operativo])
+        Catalogos([Gestionar aerolíneas, aeropuertos y puertas])
+        Auditoria([Consultar auditoría])
+    end
+
+    Visitante --> Consultar
+    Visitante --> Buscar
+    Visitante --> Detalle
+    Visitante --> Registrarse
+
+    Cliente --> Consultar
+    Cliente --> Buscar
+    Cliente --> Detalle
+    Cliente --> Reservar
+    Cliente --> CancelarReserva
+    Cliente --> Seguir
+    Cliente --> Notificaciones
+
+    Operador --> Consultar
+    Operador --> Actualizar
+    Operador --> Cambio
+    Operador --> Estado
+    Operador --> Historial
+
+    Admin --> CrearVuelo
+    Admin --> Actualizar
+    Admin --> Cambio
+    Admin --> Estado
+    Admin --> Catalogos
+    Admin --> Auditoria
+
+    Auditor --> Consultar
+    Auditor --> Historial
+    Auditor --> Auditoria
+~~~
+
+Regla de separación: los casos de uso de clientes se atienden en `Siv.Web` y `Siv.Api.Web`; la creación y modificación de vuelos, catálogos, cambios operativos y auditoría se realizan en `Siv.Desktop` y `Siv.Api.Desktop`.
+
+## 9. Diagrama de componentes
+
+~~~mermaid
+flowchart LR
+    subgraph Clientes[Aplicaciones cliente]
+        Browser[Navegador web<br/>Siv.Web MVC]
+        Desktop[Aplicación WPF<br/>Siv.Desktop MVVM]
+    end
+
+    subgraph APIs[Servicios HTTP]
+        ApiWeb[Siv.Api.Web<br/>vuelos públicos, reservas,<br/>seguimientos y SignalR]
+        ApiDesktop[Siv.Api.Desktop<br/>operación, catálogos,<br/>estados y auditoría]
+    end
+
+    subgraph Aplicacion[Capa de aplicación]
+        Servicios[Servicios de casos de uso<br/>DTOs + validaciones]
+        Contratos[Interfaces de repositorio<br/>y servicios]
+    end
+
+    subgraph Nucleo[Núcleo e infraestructura]
+        Domain[Siv.Domain<br/>entidades y reglas de negocio]
+        Persistence[Siv.Persistence<br/>EF Core, repositorios,<br/>Unit of Work y migraciones]
+        Database[(SQL Server / LocalDB<br/>SivDb)]
+    end
+
+    subgraph Integraciones[Integraciones]
+        SignalR[NotificacionesHub<br/>SignalR]
+        SMTP[Servidor SMTP<br/>correo opcional]
+    end
+
+    Browser -->|HTTP + cookies/JWT| ApiWeb
+    Desktop -->|HTTP + JWT| ApiDesktop
+    ApiWeb --> Servicios
+    ApiDesktop --> Servicios
+    ApiWeb --> Persistence
+    ApiDesktop --> Persistence
+    Servicios --> Contratos
+    Servicios --> Domain
+    Persistence --> Contratos
+    Persistence --> Domain
+    Persistence --> Database
+    ApiDesktop -->|difusión de cambio| ApiWeb
+    ApiWeb --> SignalR
+    Servicios -->|correo de cambio operativo| SMTP
+~~~
+
+Las APIs funcionan como puntos de composición: consumen los servicios de aplicación y registran la persistencia concreta. `Siv.Web` no llama directamente a repositorios y `Siv.Desktop` no accede directamente a la base de datos; ambos consumen sus APIs mediante HTTP.
+
+## 10. Recomendación para entregar los diagramas
 
 1. Abrir este archivo en GitHub o en un editor con soporte Mermaid.
 2. Exportar cada bloque como SVG o PNG.
