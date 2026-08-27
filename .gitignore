@@ -6,8 +6,6 @@
 # dotenv files
 .env
 
-# Configuración SMTP local; puede contener contraseñas y no debe publicarse.
-**/appsettings.Local.json
 
 # User-specific files
 *.rsuser
