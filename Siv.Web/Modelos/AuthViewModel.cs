@@ -26,6 +26,11 @@ public class RegistroViewModel
     [Display(Name = "Usuario")]
     public string NombreUsuario { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "El correo es obligatorio.")]
+    [EmailAddress(ErrorMessage = "Indica un correo electrónico válido.")]
+    [Display(Name = "Correo electrónico")]
+    public string Correo { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "La contraseña es obligatoria.")]
     [DataType(DataType.Password)]
     [MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]

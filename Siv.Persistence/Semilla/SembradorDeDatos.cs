@@ -75,31 +75,24 @@ public static class SembradorDeDatos
 
     private static async Task SembrarPuertasAsync(SivDbContext contexto)
     {
-        if (await contexto.Puertas.AnyAsync())
-            return;
+        var aeropuertos = await contexto.Aeropuertos.ToListAsync();
+        var puertasDisponibles = new List<string> { "1", "2", "3", "4", "5" };
+        puertasDisponibles.AddRange(
+            Enumerable.Range(1, 20)
+                .SelectMany(numero => new[] { "A", "B", "C", "D" }.Select(letra => $"{letra}{numero}")));
 
-        var a1 = await contexto.Aeropuertos.FirstOrDefaultAsync(a => a.Codigo == "SDQ");
-        var a2 = await contexto.Aeropuertos.FirstOrDefaultAsync(a => a.Codigo == "PUJ");
-
-        if (a1 != null)
+        foreach (var aeropuerto in aeropuertos)
         {
-            contexto.Puertas.AddRange(
-                new Puerta("1", a1.Id),
-                new Puerta("2", a1.Id),
-                new Puerta("3", a1.Id),
-                new Puerta("4", a1.Id),
-                new Puerta("5", a1.Id)
-            );
-        }
+            var existentes = await contexto.Puertas
+                .Where(p => p.AeropuertoId == aeropuerto.Id)
+                .Select(p => p.Nombre)
+                .ToListAsync();
 
-        if (a2 != null)
-        {
-            contexto.Puertas.AddRange(
-                new Puerta("A1", a2.Id),
-                new Puerta("A2", a2.Id),
-                new Puerta("B1", a2.Id),
-                new Puerta("B2", a2.Id)
-            );
+            var nuevas = puertasDisponibles
+                .Where(nombre => !existentes.Contains(nombre, StringComparer.OrdinalIgnoreCase))
+                .Select(nombre => new Puerta(nombre, aeropuerto.Id));
+
+            contexto.Puertas.AddRange(nuevas);
         }
 
         await contexto.SaveChangesAsync();

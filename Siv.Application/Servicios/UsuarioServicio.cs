@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Net.Mail;
 using Microsoft.Extensions.Logging;
 using Siv.Application.Dtos;
 using Siv.Application.Excepciones;
@@ -29,12 +30,13 @@ public class UsuarioServicio : IUsuarioServicio
     public async Task RegistrarAsync(RegistrarUsuarioDto dto)
     {
         var nombre = dto.NombreUsuario?.Trim().ToLowerInvariant() ?? string.Empty;
-        ValidarRegistro(nombre, dto.Password);
+        var correo = dto.Correo?.Trim().ToLowerInvariant() ?? string.Empty;
+        ValidarRegistro(nombre, correo, dto.Password);
 
         if (await _unidadDeTrabajo.Usuarios.ObtenerPorNombreAsync(nombre) is not null)
             throw new ExcepcionDeValidacion("Ese nombre de usuario ya está registrado.");
 
-        var usuario = new Usuario(nombre, "UsuarioRegistrado");
+        var usuario = new Usuario(nombre, "UsuarioRegistrado", correo);
         usuario.EstablecerPasswordHash(PasswordHasher.Crear(dto.Password));
 
         await _unidadDeTrabajo.Usuarios.AgregarAsync(usuario);
@@ -62,10 +64,24 @@ public class UsuarioServicio : IUsuarioServicio
         };
     }
 
-    private void ValidarRegistro(string nombre, string password)
+    public async Task<string?> ObtenerCorreoAsync(string nombreUsuario)
+    {
+        var nombre = nombreUsuario?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(nombre))
+            return null;
+
+        var usuario = await _unidadDeTrabajo.Usuarios.ObtenerPorNombreAsync(nombre);
+        return usuario?.Correo;
+    }
+
+    private void ValidarRegistro(string nombre, string correo, string password)
     {
         if (nombre.Length < 3 || nombre.Length > 50 || !NombreValido.IsMatch(nombre))
             throw new ExcepcionDeValidacion("El usuario debe tener entre 3 y 50 caracteres y solo puede usar letras, números, punto, guion o guion bajo.");
+
+        if (string.IsNullOrWhiteSpace(correo) || !MailAddress.TryCreate(correo, out var direccion) ||
+            !string.Equals(direccion.Address, correo, StringComparison.OrdinalIgnoreCase))
+            throw new ExcepcionDeValidacion("Debes indicar un correo electrónico válido.");
 
         if (string.IsNullOrWhiteSpace(password) || password.Length < 8 ||
             !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit))

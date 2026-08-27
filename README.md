@@ -3,7 +3,7 @@
 Este es el repositorio oficial del **Sistema de Información de Vuelos (SIV)**, una solución integral desarrollada bajo los principios de **Clean Architecture** (Arquitectura Limpia) para la gestión, seguimiento y notificación en tiempo real de operaciones aeroportuarias.
 
 El sistema está dividido en múltiples aplicaciones y capas para garantizar separación de responsabilidades (SoC), escalabilidad y un estricto control de acceso basado en roles (RBAC).
-<img width="1701" height="1219" alt="image" src="https://github.com/user-attachments/assets/e35d9e69-4a5a-432f-9911-cf5903024290" />
+<img width="1701" height="1219" alt="image" src="https://github.com/user-attachments/assets/a255e1ee-691b-472b-8f08-2eb4a0a2ed46" />
 
 ---
 

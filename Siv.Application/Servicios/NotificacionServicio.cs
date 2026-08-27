@@ -12,13 +12,23 @@ public class NotificacionServicio : INotificacionServicio
     private readonly IUnitOfWork _unidadDeTrabajo;
     private readonly IAuditoriaServicio _auditoriaServicio;
     private readonly INotificadorTiempoReal _notificadorTiempoReal;
+    private readonly IUsuarioServicio _usuarioServicio;
+    private readonly IEmailServicio _emailServicio;
     private readonly ILogger<NotificacionServicio> _logger;
 
-    public NotificacionServicio(IUnitOfWork unidadDeTrabajo, IAuditoriaServicio auditoriaServicio, INotificadorTiempoReal notificadorTiempoReal, ILogger<NotificacionServicio> logger)
+    public NotificacionServicio(
+        IUnitOfWork unidadDeTrabajo,
+        IAuditoriaServicio auditoriaServicio,
+        INotificadorTiempoReal notificadorTiempoReal,
+        IUsuarioServicio usuarioServicio,
+        IEmailServicio emailServicio,
+        ILogger<NotificacionServicio> logger)
     {
         _unidadDeTrabajo = unidadDeTrabajo;
         _auditoriaServicio = auditoriaServicio;
         _notificadorTiempoReal = notificadorTiempoReal;
+        _usuarioServicio = usuarioServicio;
+        _emailServicio = emailServicio;
         _logger = logger;
     }
 
@@ -102,6 +112,23 @@ public class NotificacionServicio : INotificacionServicio
         foreach (var usuario in interesados.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             await _notificadorTiempoReal.EnviarNotificacionAsync(usuario, mensaje);
+
+            var correo = await _usuarioServicio.ObtenerCorreoAsync(usuario);
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                _logger.LogWarning("El usuario {Usuario} no tiene correo registrado; se conserva la notificación interna.", usuario);
+                continue;
+            }
+
+            try
+            {
+                await _emailServicio.EnviarAsync(correo, "Actualización operativa de tu vuelo", mensaje);
+            }
+            catch (Exception excepcion)
+            {
+                // SMTP no debe deshacer el cambio operativo ni la notificación guardada.
+                _logger.LogError(excepcion, "No se pudo enviar por correo la notificación a {Correo}.", correo);
+            }
         }
 
         await _auditoriaServicio.RegistrarAsync(

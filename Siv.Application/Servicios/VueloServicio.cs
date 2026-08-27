@@ -91,6 +91,8 @@ public class VueloServicio : IVueloServicio
         }
 
         await ValidarReferenciasAsync(dto.AerolineaId, dto.AeropuertoOrigenId, dto.AeropuertoDestinoId);
+        dto.Puerta = await ValidarPuertaDisponibleAsync(
+            dto.Puerta, dto.AeropuertoOrigenId, dto.HorarioProgramado);
 
         var numeroVuelo = dto.NumeroVuelo?.Trim() ?? string.Empty;
 
@@ -154,6 +156,8 @@ public class VueloServicio : IVueloServicio
         }
 
         await ValidarReferenciasAsync(dto.AerolineaId, dto.AeropuertoOrigenId, dto.AeropuertoDestinoId);
+        dto.Puerta = await ValidarPuertaDisponibleAsync(
+            dto.Puerta, dto.AeropuertoOrigenId, dto.HorarioProgramado, dto.VueloId);
 
         var numeroVuelo = dto.NumeroVuelo?.Trim() ?? string.Empty;
 
@@ -337,5 +341,39 @@ public class VueloServicio : IVueloServicio
             throw new ExcepcionRecursoNoEncontrado(
                 $"No existe el aeropuerto de destino con id {aeropuertoDestinoId}.");
         }
+    }
+
+    private async Task<string?> ValidarPuertaDisponibleAsync(
+        string? puertaSolicitada,
+        int aeropuertoId,
+        DateTime horario,
+        int? excluirVueloId = null)
+    {
+        if (string.IsNullOrWhiteSpace(puertaSolicitada))
+            return null;
+
+        var nombrePuerta = puertaSolicitada.Trim().ToUpperInvariant();
+        var puerta = (await _unidadDeTrabajo.Puertas.ObtenerTodosAsync())
+            .FirstOrDefault(p => p.AeropuertoId == aeropuertoId &&
+                p.Nombre.Equals(nombrePuerta, StringComparison.OrdinalIgnoreCase));
+
+        if (puerta is null)
+            throw new ExcepcionDeValidacion(
+                $"La puerta '{nombrePuerta}' no está disponible para el aeropuerto seleccionado.");
+
+        var vuelos = await _unidadDeTrabajo.Vuelos.ObtenerTodosConDetalleAsync();
+        var puertaOcupada = vuelos.Any(v =>
+            (!excluirVueloId.HasValue || v.Id != excluirVueloId.Value) &&
+            v.AeropuertoOrigenId == aeropuertoId &&
+            string.Equals(v.Puerta, puerta.Nombre, StringComparison.OrdinalIgnoreCase) &&
+            v.EstadoVuelo is not null &&
+            !v.EstadoVuelo.EsFinal() &&
+            Math.Abs((v.HorarioProgramado - horario).TotalMinutes) < 120);
+
+        if (puertaOcupada)
+            throw new ExcepcionDeValidacion(
+                $"La puerta '{nombrePuerta}' no está disponible para ese horario.");
+
+        return puerta.Nombre;
     }
 }

@@ -29,6 +29,13 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
             .HasMaxLength(300)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(u => u.Correo)
+            .HasMaxLength(320);
+
+        builder.HasIndex(u => u.Correo)
+            .IsUnique()
+            .HasFilter("[Correo] IS NOT NULL");
+
         builder.Property(u => u.Activo)
             .IsRequired();
 

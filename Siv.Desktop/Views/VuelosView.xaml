@@ -31,8 +31,10 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="Número" VerticalAlignment="Center" Margin="0,4" />
                 <TextBox Grid.Column="1" Text="{Binding NumeroVueloNuevo, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
-                <TextBlock Grid.Column="2" Text="Puerta" VerticalAlignment="Center" Margin="8,4,0,4" />
-                <TextBox Grid.Column="3" Text="{Binding PuertaNueva, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
+                <TextBlock Grid.Column="2" Text="Puerta disponible" VerticalAlignment="Center" Margin="8,4,0,4" />
+                <ComboBox Grid.Column="3" ItemsSource="{Binding PuertasDisponibles}"
+                          DisplayMemberPath="Codigo" SelectedItem="{Binding PuertaNueva}" Margin="5"
+                          ToolTip="Las puertas se filtran por aeropuerto y horario." />
                 <TextBlock Grid.Row="1" Text="Aerolínea" VerticalAlignment="Center" Margin="0,4" />
                 <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Aerolineas}" DisplayMemberPath="Nombre" SelectedItem="{Binding AerolineaNueva}" Margin="5" />
                 <TextBlock Grid.Row="1" Grid.Column="2" Text="Origen" VerticalAlignment="Center" Margin="8,4,0,4" />
