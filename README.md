@@ -9,7 +9,7 @@ El sistema está dividido en múltiples aplicaciones y capas para garantizar sep
 
 ## 🏗 Arquitectura y Estructura del Proyecto
 
-La documentación formal de requisitos, arquitectura, diagramas UML, matriz de cumplimiento y evidencias se encuentra en [`docs/`](docs/README.md).
+La documentación formal de requisitos, arquitectura, diagramas UML, matriz de cumplimiento y evidencias se encuentra en [`docs/`](docs/README.md). Los siete diagramas de arquitectura en Mermaid están disponibles en [`Documentacion/Diagramas-Arquitectura-SIV.md`](Documentacion/Diagramas-Arquitectura-SIV.md).
 
 El sistema está dividido en las siguientes capas (Clean Architecture):
 
