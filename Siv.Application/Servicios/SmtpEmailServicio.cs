@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Siv.Application.Interfaces;
@@ -33,7 +34,15 @@ public sealed class SmtpEmailServicio : IEmailServicio
         var port = int.TryParse(_configuration["Email:Smtp:Port"], out var configuredPort) ? configuredPort : 587;
         var enableSsl = !bool.TryParse(_configuration["Email:Smtp:EnableSsl"], out var configuredSsl) || configuredSsl;
 
-        using var mensaje = new MailMessage(from, destinatario, asunto, contenido);
+        var displayName = _configuration["Email:Smtp:DisplayName"];
+        using var mensaje = new MailMessage
+        {
+            From = new MailAddress(from, displayName ?? "SIV", Encoding.UTF8),
+            Subject = asunto,
+            Body = contenido,
+            IsBodyHtml = false
+        };
+        mensaje.To.Add(destinatario);
         using var cliente = new SmtpClient(host, port) { EnableSsl = enableSsl };
 
         var username = _configuration["Email:Smtp:Username"];
