@@ -6,7 +6,7 @@ namespace Siv.Api.Desktop.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Operador,Administrador")]
+[Authorize(Roles = "Admin,Operador")]
 public class PuertasController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -24,6 +24,7 @@ public class PuertasController : ControllerBase
         {
             p.Id,
             Codigo = p.Nombre,
+            p.AeropuertoId,
             Estado = "Operativa"
         }));
     }

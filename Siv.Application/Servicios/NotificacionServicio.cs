@@ -12,13 +12,23 @@ public class NotificacionServicio : INotificacionServicio
     private readonly IUnitOfWork _unidadDeTrabajo;
     private readonly IAuditoriaServicio _auditoriaServicio;
     private readonly INotificadorTiempoReal _notificadorTiempoReal;
+    private readonly IUsuarioServicio _usuarioServicio;
+    private readonly IEmailServicio _emailServicio;
     private readonly ILogger<NotificacionServicio> _logger;
 
-    public NotificacionServicio(IUnitOfWork unidadDeTrabajo, IAuditoriaServicio auditoriaServicio, INotificadorTiempoReal notificadorTiempoReal, ILogger<NotificacionServicio> logger)
+    public NotificacionServicio(
+        IUnitOfWork unidadDeTrabajo,
+        IAuditoriaServicio auditoriaServicio,
+        INotificadorTiempoReal notificadorTiempoReal,
+        IUsuarioServicio usuarioServicio,
+        IEmailServicio emailServicio,
+        ILogger<NotificacionServicio> logger)
     {
         _unidadDeTrabajo = unidadDeTrabajo;
         _auditoriaServicio = auditoriaServicio;
         _notificadorTiempoReal = notificadorTiempoReal;
+        _usuarioServicio = usuarioServicio;
+        _emailServicio = emailServicio;
         _logger = logger;
     }
 
@@ -129,6 +139,23 @@ public class NotificacionServicio : INotificacionServicio
                 registroId: notificacion.Id,
                 valorAnterior: "Pendiente",
                 valorNuevo: resultado);
+
+            try
+            {
+                var correo = await _usuarioServicio.ObtenerCorreoAsync(notificacion.Usuario);
+                if (string.IsNullOrWhiteSpace(correo))
+                {
+                    _logger.LogWarning("El usuario {Usuario} no tiene correo registrado; se conserva la notificación interna.", notificacion.Usuario);
+                    continue;
+                }
+
+                await _emailServicio.EnviarAsync(correo, "Actualización operativa de tu vuelo", notificacion.Mensaje);
+            }
+            catch (Exception excepcion)
+            {
+                // Un fallo de correo no debe deshacer el cambio operativo ni la notificación guardada.
+                _logger.LogError(excepcion, "No se pudo enviar por correo la notificación al usuario {Usuario}.", notificacion.Usuario);
+            }
         }
 
         await _auditoriaServicio.RegistrarAsync(

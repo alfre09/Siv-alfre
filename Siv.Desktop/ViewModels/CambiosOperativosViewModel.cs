@@ -14,6 +14,7 @@ public partial class CambiosOperativosViewModel : ViewModelBase
     private readonly IEstadoVueloApiServicio _estadoVueloApiServicio;
     private readonly IVueloApiServicio _vueloApiServicio;
     private readonly IPuertaApiServicio _puertaApiServicio;
+    private List<PuertaModelo> _todasLasPuertas = new();
 
     [ObservableProperty]
     private ObservableCollection<CambioOperativoModelo> _cambios = new();
@@ -38,6 +39,7 @@ public partial class CambiosOperativosViewModel : ViewModelBase
         if (value != null)
         {
             NuevoHorarioTexto = value.HorarioProgramado.ToString("dd/MM/yyyy HH:mm");
+            ActualizarPuertasDisponibles(value);
             
             if (!string.IsNullOrWhiteSpace(value.Puerta))
             {
@@ -109,7 +111,8 @@ public partial class CambiosOperativosViewModel : ViewModelBase
                 Cambios = new ObservableCollection<CambioOperativoModelo>(cambios);
                 Estados = new ObservableCollection<EstadoVueloModelo>(estados);
                 Vuelos = new ObservableCollection<VueloModelo>(vuelos);
-                Puertas = new ObservableCollection<PuertaModelo>(puertas);
+                _todasLasPuertas = puertas;
+                ActualizarPuertasDisponibles(VueloSeleccionado);
             });
         }
         catch (Exception ex)
@@ -229,5 +232,30 @@ public partial class CambiosOperativosViewModel : ViewModelBase
         PuertaSeleccionada = null;
         Causa = string.Empty;
         EstadoSeleccionado = null;
+    }
+
+    private void ActualizarPuertasDisponibles(VueloModelo? vuelo)
+    {
+        if (vuelo is null)
+        {
+            Puertas = new ObservableCollection<PuertaModelo>(_todasLasPuertas);
+            return;
+        }
+
+        var ocupadas = Vuelos
+            .Where(v => v.VueloId != vuelo.VueloId &&
+                        v.AeropuertoOrigenId == vuelo.AeropuertoOrigenId &&
+                        !string.IsNullOrWhiteSpace(v.Puerta) &&
+                        Math.Abs((v.HorarioProgramado - vuelo.HorarioProgramado).TotalMinutes) < 120 &&
+                        !string.Equals(v.EstadoVueloNombre, "Cancelado", StringComparison.OrdinalIgnoreCase))
+            .Select(v => v.Puerta!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Puertas = new ObservableCollection<PuertaModelo>(
+            _todasLasPuertas
+                .Where(p => p.AeropuertoId == vuelo.AeropuertoOrigenId &&
+                            (!ocupadas.Contains(p.Codigo) ||
+                             string.Equals(p.Codigo, vuelo.Puerta, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(p => p.Codigo, StringComparer.OrdinalIgnoreCase));
     }
 }

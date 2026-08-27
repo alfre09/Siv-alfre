@@ -15,18 +15,21 @@ public partial class VuelosViewModel : ViewModelBase
     private readonly IVueloApiServicio _vueloApiServicio;
     private readonly IAerolineaApiServicio _aerolineaApiServicio;
     private readonly IAeropuertoApiServicio _aeropuertoApiServicio;
+    private readonly IPuertaApiServicio _puertaApiServicio;
+    private List<PuertaModelo> _todasLasPuertas = new();
 
     [ObservableProperty] private ObservableCollection<VueloModelo> _vuelos = new();
     [ObservableProperty] private VueloModelo? _vueloSeleccionado;
     [ObservableProperty] private ObservableCollection<AerolineaModelo> _aerolineas = new();
     [ObservableProperty] private ObservableCollection<AeropuertoModelo> _aeropuertos = new();
+    [ObservableProperty] private ObservableCollection<PuertaModelo> _puertasDisponibles = new();
 
     [ObservableProperty] private string _numeroVueloNuevo = string.Empty;
     [ObservableProperty] private AerolineaModelo? _aerolineaNueva;
     [ObservableProperty] private AeropuertoModelo? _aeropuertoOrigenNuevo;
     [ObservableProperty] private AeropuertoModelo? _aeropuertoDestinoNuevo;
     [ObservableProperty] private string _horarioProgramadoNuevo = DateTime.Now.AddDays(1).ToString("dd/MM/yyyy HH:mm");
-    [ObservableProperty] private string _puertaNueva = string.Empty;
+    [ObservableProperty] private PuertaModelo? _puertaNueva;
     [ObservableProperty] private string _nivelVisibilidadNuevo = "Publico";
 
     public List<string> NivelesVisibilidad { get; } = new() { "Publico", "Interno", "Restringido" };
@@ -35,14 +38,19 @@ public partial class VuelosViewModel : ViewModelBase
     public VuelosViewModel(
         IVueloApiServicio vueloApiServicio,
         IAerolineaApiServicio aerolineaApiServicio,
-        IAeropuertoApiServicio aeropuertoApiServicio)
+        IAeropuertoApiServicio aeropuertoApiServicio,
+        IPuertaApiServicio puertaApiServicio)
     {
         _vueloApiServicio = vueloApiServicio;
         _aerolineaApiServicio = aerolineaApiServicio;
         _aeropuertoApiServicio = aeropuertoApiServicio;
+        _puertaApiServicio = puertaApiServicio;
 
         _ = CargarDatosAsync();
     }
+
+    partial void OnAeropuertoOrigenNuevoChanged(AeropuertoModelo? value) => ActualizarPuertasDisponibles();
+    partial void OnHorarioProgramadoNuevoChanged(string value) => ActualizarPuertasDisponibles();
 
     [RelayCommand]
     private async Task CargarDatosAsync()
@@ -52,12 +60,15 @@ public partial class VuelosViewModel : ViewModelBase
             var vuelos = await _vueloApiServicio.ObtenerTodosAsync();
             var aerolineas = await _aerolineaApiServicio.ObtenerTodosAsync();
             var aeropuertos = await _aeropuertoApiServicio.ObtenerTodosAsync();
+            var puertas = await _puertaApiServicio.ObtenerTodasAsync();
 
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 Vuelos = new ObservableCollection<VueloModelo>(vuelos);
                 Aerolineas = new ObservableCollection<AerolineaModelo>(aerolineas);
                 Aeropuertos = new ObservableCollection<AeropuertoModelo>(aeropuertos);
+                _todasLasPuertas = puertas;
+                ActualizarPuertasDisponibles();
             });
         }
         catch (ExcepcionApi ex)
@@ -109,9 +120,9 @@ public partial class VuelosViewModel : ViewModelBase
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(PuertaNueva) && PuertaNueva.Length > 5)
+        if (PuertaNueva is not null && !PuertasDisponibles.Contains(PuertaNueva))
         {
-            MostrarValidacion("El nombre de la puerta no puede exceder los 5 caracteres.");
+            MostrarValidacion("La puerta seleccionada no está disponible para ese aeropuerto y horario.");
             return;
         }
 
@@ -124,7 +135,7 @@ public partial class VuelosViewModel : ViewModelBase
                 AeropuertoOrigenId = AeropuertoOrigenNuevo.AeropuertoId,
                 AeropuertoDestinoId = AeropuertoDestinoNuevo.AeropuertoId,
                 HorarioProgramado = horario,
-                Puerta = string.IsNullOrWhiteSpace(PuertaNueva) ? null : PuertaNueva.Trim(),
+                Puerta = PuertaNueva?.Codigo,
                 NivelVisibilidad = NivelVisibilidadNuevo
             });
 
@@ -149,8 +160,44 @@ public partial class VuelosViewModel : ViewModelBase
         AeropuertoOrigenNuevo = null;
         AeropuertoDestinoNuevo = null;
         HorarioProgramadoNuevo = DateTime.Now.AddDays(1).ToString("dd/MM/yyyy HH:mm");
-        PuertaNueva = string.Empty;
+        PuertaNueva = null;
         NivelVisibilidadNuevo = "Publico";
+    }
+
+    private void ActualizarPuertasDisponibles()
+    {
+        if (AeropuertoOrigenNuevo is null)
+        {
+            PuertasDisponibles = new ObservableCollection<PuertaModelo>(_todasLasPuertas);
+            return;
+        }
+
+        var horarioValido = DateTime.TryParse(
+            HorarioProgramadoNuevo,
+            CultureInfo.CurrentCulture,
+            DateTimeStyles.AllowWhiteSpaces,
+            out var horario);
+
+        var ocupadas = horarioValido
+            ? Vuelos.Where(v =>
+                    v.AeropuertoOrigenId == AeropuertoOrigenNuevo.AeropuertoId &&
+                    !string.IsNullOrWhiteSpace(v.Puerta) &&
+                    Math.Abs((v.HorarioProgramado - horario).TotalMinutes) < 120 &&
+                    !string.Equals(v.EstadoVueloNombre, "Cancelado", StringComparison.OrdinalIgnoreCase))
+                .Select(v => v.Puerta!)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        var disponibles = _todasLasPuertas
+            .Where(p => p.AeropuertoId == AeropuertoOrigenNuevo.AeropuertoId &&
+                        (!ocupadas.Contains(p.Codigo) ||
+                         (PuertaNueva is not null && p.Id == PuertaNueva.Id)))
+            .OrderBy(p => p.Codigo, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        PuertasDisponibles = new ObservableCollection<PuertaModelo>(disponibles);
+        if (PuertaNueva is not null && !disponibles.Any(p => p.Id == PuertaNueva.Id))
+            PuertaNueva = null;
     }
 
     private static void MostrarValidacion(string mensaje) =>

@@ -16,6 +16,8 @@ public class NotificacionServicioTests
         var notificaciones = new Mock<INotificacionRepositorio>();
         var auditoria = new Mock<IAuditoriaServicio>();
         var notificador = new Mock<INotificadorTiempoReal>();
+        var usuarios = new Mock<IUsuarioServicio>();
+        var correo = new Mock<IEmailServicio>();
 
         unidadDeTrabajo.Setup(u => u.Seguimientos).Returns(seguimientos.Object);
         unidadDeTrabajo.Setup(u => u.Notificaciones).Returns(notificaciones.Object);
@@ -32,11 +34,16 @@ public class NotificacionServicioTests
         notificador
             .Setup(n => n.EnviarNotificacionAsync("cliente2", It.IsAny<string>()))
             .ReturnsAsync(false);
+        usuarios
+            .Setup(u => u.ObtenerCorreoAsync(It.IsAny<string>()))
+            .ReturnsAsync((string?)null);
 
         var servicio = new NotificacionServicio(
             unidadDeTrabajo.Object,
             auditoria.Object,
             notificador.Object,
+            usuarios.Object,
+            correo.Object,
             new Mock<ILogger<NotificacionServicio>>().Object);
 
         await servicio.GenerarNotificacionesPorCambioAsync(7, 11, "Cambio de puerta");

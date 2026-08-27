@@ -87,14 +87,32 @@ public class CambioOperativoServicio : ICambioOperativoServicio
         _logger.LogInformation("Iniciando registro de cambio de puerta para vuelo {VueloId}", dto.VueloId);
         var vuelo = await ObtenerVueloConEstadoAsync(dto.VueloId);
         
-        var puertaExiste = await _unidadDeTrabajo.Puertas.ObtenerTodosAsync();
-        if (!puertaExiste.Any(p => p.Nombre.Equals(dto.NuevaPuerta, StringComparison.OrdinalIgnoreCase)))
+        var nombrePuerta = dto.NuevaPuerta?.Trim().ToUpperInvariant() ?? string.Empty;
+        var puertas = await _unidadDeTrabajo.Puertas.ObtenerTodosAsync();
+        var puertaExiste = puertas.FirstOrDefault(p =>
+            p.AeropuertoId == vuelo.AeropuertoOrigenId &&
+            p.Nombre.Equals(nombrePuerta, StringComparison.OrdinalIgnoreCase));
+
+        if (puertaExiste is null)
         {
             _logger.LogWarning("Fallo de validación: La puerta {NuevaPuerta} no existe en el sistema.", dto.NuevaPuerta);
-            throw new ExcepcionDeValidacion($"La puerta '{dto.NuevaPuerta}' no existe en el aeropuerto. Por favor selecciona una válida.");
+            throw new ExcepcionDeValidacion($"La puerta '{nombrePuerta}' no está disponible para el aeropuerto del vuelo.");
         }
-        
-        var (valorAnterior, valorNuevo) = vuelo.AplicarCambioDePuerta(dto.NuevaPuerta);
+
+        var vuelos = await _unidadDeTrabajo.Vuelos.ObtenerTodosConDetalleAsync();
+        if (vuelos.Any(v =>
+            v.Id != vuelo.Id &&
+            v.AeropuertoOrigenId == vuelo.AeropuertoOrigenId &&
+            string.Equals(v.Puerta, puertaExiste.Nombre, StringComparison.OrdinalIgnoreCase) &&
+            v.EstadoVuelo is not null &&
+            !v.EstadoVuelo.EsFinal() &&
+            Math.Abs((v.HorarioProgramado - vuelo.HorarioProgramado).TotalMinutes) < 120))
+        {
+            throw new ExcepcionDeValidacion(
+                $"La puerta '{puertaExiste.Nombre}' no está disponible para ese horario.");
+        }
+
+        var (valorAnterior, valorNuevo) = vuelo.AplicarCambioDePuerta(puertaExiste.Nombre);
 
         if (string.Equals(valorAnterior, valorNuevo, StringComparison.OrdinalIgnoreCase))
         {

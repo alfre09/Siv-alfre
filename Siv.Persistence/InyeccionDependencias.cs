@@ -44,6 +44,7 @@ public static class InyeccionDependencias
         services.AddScoped<IVueloServicio, VueloServicio>();
         services.AddScoped<IReservaServicio, ReservaServicio>();
         services.AddScoped<IUsuarioServicio, UsuarioServicio>();
+        services.AddScoped<IEmailServicio, SmtpEmailServicio>();
         return services;
     }
 }

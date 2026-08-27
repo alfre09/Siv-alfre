@@ -45,6 +45,7 @@ public class SivApiWebIntegrationTests
         var registro = await cliente.PostAsJsonAsync("api/auth/registro", new
         {
             nombreUsuario = nombre,
+            correo = $"{nombre}@example.com",
             password = "Cliente123!"
         });
         var login = await cliente.PostAsJsonAsync("api/auth/login", new
@@ -55,6 +56,7 @@ public class SivApiWebIntegrationTests
         var duplicado = await cliente.PostAsJsonAsync("api/auth/registro", new
         {
             nombreUsuario = nombre,
+            correo = $"{nombre}@example.com",
             password = "Cliente123!"
         });
 
@@ -239,6 +241,8 @@ public class SivApiWebIntegrationTests
         contexto.EstadosVuelo.Add(estado);
         contexto.Aerolineas.Add(aerolinea);
         contexto.Aeropuertos.AddRange(origen, destino);
+        await contexto.SaveChangesAsync();
+        contexto.Puertas.Add(new Puerta("A1", origen.Id));
         await contexto.SaveChangesAsync();
 
         using var desktopClient = desktopFactory.CreateClient();

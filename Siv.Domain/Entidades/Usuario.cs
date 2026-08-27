@@ -11,7 +11,7 @@ public class Usuario : EntidadBase
         PasswordHash = string.Empty;
     }
 
-    public Usuario(string nombreUsuario, string rol, bool activo = true)
+    public Usuario(string nombreUsuario, string rol, string? correo = null, bool activo = true)
     {
         if (string.IsNullOrWhiteSpace(nombreUsuario))
             throw new ArgumentException("El nombre de usuario es obligatorio.", nameof(nombreUsuario));
@@ -22,6 +22,7 @@ public class Usuario : EntidadBase
         NombreUsuario = nombreUsuario.Trim().ToLower();
         Rol = rol.Trim();
         PasswordHash = string.Empty;
+        Correo = correo?.Trim().ToLowerInvariant();
         Activo = activo;
         FechaCreacion = DateTime.UtcNow;
     }
@@ -29,6 +30,7 @@ public class Usuario : EntidadBase
     public string NombreUsuario { get; private set; }
     public string Rol { get; private set; }
     public string PasswordHash { get; private set; }
+    public string? Correo { get; private set; }
     public bool Activo { get; private set; }
     public DateTime FechaCreacion { get; private set; }
 

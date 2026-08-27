@@ -21,6 +21,7 @@ public class AuthApiServicio : ApiServicioBase, IAuthApiServicio
         var respuesta = await ClienteHttp.PostAsJsonAsync("api/auth/registro", new
         {
             nombreUsuario = modelo.NombreUsuario,
+            correo = modelo.Correo,
             password = modelo.Password
         });
 

@@ -16,6 +16,7 @@ public class VueloServicioTests
     private readonly Mock<IAerolineaRepositorio> _aerolineaRepoMock;
     private readonly Mock<IAeropuertoRepositorio> _aeropuertoRepoMock;
     private readonly Mock<IEstadoVueloRepositorio> _estadoVueloRepoMock;
+    private readonly Mock<IPuertaRepositorio> _puertaRepoMock;
     private readonly Mock<IAuditoriaServicio> _auditoriaMock;
     private readonly Mock<ICambioOperativoServicio> _cambioOperativoMock;
     private readonly VueloServicio _vueloServicio;
@@ -27,6 +28,7 @@ public class VueloServicioTests
         _aerolineaRepoMock = new Mock<IAerolineaRepositorio>();
         _aeropuertoRepoMock = new Mock<IAeropuertoRepositorio>();
         _estadoVueloRepoMock = new Mock<IEstadoVueloRepositorio>();
+        _puertaRepoMock = new Mock<IPuertaRepositorio>();
         _auditoriaMock = new Mock<IAuditoriaServicio>();
         _cambioOperativoMock = new Mock<ICambioOperativoServicio>();
 
@@ -34,6 +36,7 @@ public class VueloServicioTests
         _unitOfWorkMock.Setup(u => u.Aerolineas).Returns(_aerolineaRepoMock.Object);
         _unitOfWorkMock.Setup(u => u.Aeropuertos).Returns(_aeropuertoRepoMock.Object);
         _unitOfWorkMock.Setup(u => u.EstadosVuelo).Returns(_estadoVueloRepoMock.Object);
+        _unitOfWorkMock.Setup(u => u.Puertas).Returns(_puertaRepoMock.Object);
 
         _vueloServicio = new VueloServicio(
             _unitOfWorkMock.Object,
@@ -72,6 +75,11 @@ public class VueloServicioTests
 
         _estadoVueloRepoMock.Setup(r => r.ObtenerPorNombreAsync(EstadoVuelo.Programado)).ReturnsAsync(estadoVuelo);
         _vueloRepoMock.Setup(r => r.ExisteNumeroVueloAsync("AB123", null)).ReturnsAsync(false);
+        _puertaRepoMock.Setup(r => r.ObtenerTodosAsync()).ReturnsAsync(new List<Puerta>
+        {
+            new Puerta("A1", 1)
+        });
+        _vueloRepoMock.Setup(r => r.ObtenerTodosConDetalleAsync()).ReturnsAsync(new List<Vuelo>());
         _vueloRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Vuelo>())).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.GuardarCambiosAsync()).ReturnsAsync(1);
         

@@ -18,6 +18,7 @@ public static class DependenciasApplication
         servicios.AddScoped<ISeguimientoServicio, SeguimientoServicio>();
         servicios.AddScoped<IHistorialEstadoVueloServicio, HistorialEstadoVueloServicio>();
         servicios.AddScoped<INotificacionServicio, NotificacionServicio>();
+        servicios.AddScoped<IEmailServicio, SmtpEmailServicio>();
         servicios.AddScoped<ICambioOperativoServicio, CambioOperativoServicio>();
         return servicios;
     }

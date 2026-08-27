@@ -53,6 +53,12 @@ public sealed class SivApiDesktopFactory : WebApplicationFactory<DesktopProgramM
         contexto.Aerolineas.Add(aerolinea);
         contexto.Aeropuertos.AddRange(origen, destino);
         await contexto.SaveChangesAsync();
+        contexto.Puertas.AddRange(
+            new Puerta("A1", origen.Id),
+            new Puerta("B2", origen.Id),
+            new Puerta("C3", origen.Id),
+            new Puerta("D4", origen.Id));
+        await contexto.SaveChangesAsync();
 
         // Las pruebas de cambios operativos validan que la nueva puerta
         // exista. El fixture debe representar también ese catálogo.

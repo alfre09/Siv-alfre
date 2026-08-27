@@ -27,6 +27,11 @@
                     <span asp-validation-for="NombreUsuario" class="text-danger"></span>
                 </div>
                 <div class="siv-campo">
+                    <label asp-for="Correo"></label>
+                    <input asp-for="Correo" type="email" autocomplete="email" />
+                    <span asp-validation-for="Correo" class="text-danger"></span>
+                </div>
+                <div class="siv-campo">
                     <label asp-for="Password"></label>
                     <input asp-for="Password" autocomplete="new-password" />
                     <span class="texto-ayuda">Mínimo 8 caracteres, con mayúscula, minúscula y número.</span>
